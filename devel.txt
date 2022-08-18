@@ -1,8 +1,6 @@
 -r requirements.txt
 
+black
 flake8
-coveralls
-factory_boy
 pylint-django
-textdistance
 kiwitcms-django-plugin

@@ -1,0 +1,7 @@
+*.pyc
+*.pyo
+*egg*/
+dist/
+build/
+.coverage
+apps_dir/
