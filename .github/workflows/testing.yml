@@ -49,7 +49,7 @@ jobs:
     - name: Execute tests
       run: |
         export LANG=en-us
-        PYTHONPATH=.:../Kiwi coverage run --source='.' ./manage.py test -v2 --noinput tracker_integration.tests.test_${{ matrix.tracker }}
+        PYTHONPATH=.:../Kiwi coverage run --source='.' ./manage.py test -v2 --noinput trackers_integration.tests.test_${{ matrix.tracker }}
 
     - name: Send coverage to codecov.io
       uses: codecov/codecov-action@v3
