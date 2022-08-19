@@ -5,7 +5,7 @@ import os
 import sys
 
 if __name__ == "__main__":
-    if os.path.exists("kiwitcms_openproject.egg-info"):
+    if os.path.exists("kiwitcms_trackers_integration.egg-info"):
         print("ERORR: .egg-info/ directories mess up plugin loading code in devel mode")
         sys.exit(1)
 
