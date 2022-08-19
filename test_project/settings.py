@@ -17,7 +17,7 @@ entry_point = pkg_resources.EntryPoint.parse(
 dist._ep_map = {"kiwitcms.plugins": {"trackers_integration_devel": entry_point}}
 pkg_resources.working_set.add(dist)
 
-from tcms.settings.product import *  # noqa: E402, F403
+from tcms.settings.test import *  # noqa: E402, F403
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, BASE_DIR)

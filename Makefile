@@ -4,7 +4,7 @@ KIWI_INCLUDE_PATH="../Kiwi/"
 checkout_kiwi:
 	if [ ! -d "$(KIWI_INCLUDE_PATH)/kiwi_lint" ]; then \
 	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
-	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
+	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/devel.txt; \
 	fi
 
 
