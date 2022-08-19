@@ -1,6 +1,7 @@
 -r requirements.txt
 
 black
+coverage
 flake8
 pylint-django
 kiwitcms-django-plugin
