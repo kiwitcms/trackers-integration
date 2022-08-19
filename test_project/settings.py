@@ -12,9 +12,9 @@ import pkg_resources
 # .egg-info/ directory will mess up with this
 dist = pkg_resources.Distribution(__file__)
 entry_point = pkg_resources.EntryPoint.parse(
-    "kiwitcms_openproject_devel = tcms_openproject", dist=dist
+    "trackers_integration_devel = trackers_integration", dist=dist
 )
-dist._ep_map = {"kiwitcms.plugins": {"kiwitcms_openproject_devel": entry_point}}
+dist._ep_map = {"kiwitcms.plugins": {"trackers_integration_devel": entry_point}}
 pkg_resources.working_set.add(dist)
 
 from tcms.settings.product import *  # noqa: E402, F403
@@ -23,12 +23,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, BASE_DIR)
 
 # check for a clean devel environment
-if os.path.exists(os.path.join(BASE_DIR, "kiwitcms_openproject.egg-info")):
+if os.path.exists(os.path.join(BASE_DIR, "kiwitcms_trackers_integration.egg-info")):
     print("ERORR: .egg-info/ directories mess up plugin loading code in devel mode")
     sys.exit(1)
 
 # import the settings which automatically get distributed with this package
-openproject_settings = os.path.join(BASE_DIR, "tcms_settings_dir", "openproject.py")
+openproject_settings = os.path.join(BASE_DIR, "tcms_settings_dir", "trackers_integration.py")
 
 # Kiwi TCMS loads extra settings in the same way using exec()
 exec(  # pylint: disable=exec-used

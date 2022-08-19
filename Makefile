@@ -31,12 +31,12 @@ pylint:
 	    --load-plugins=kiwi_lint -d similar-string \
 	    -d missing-docstring -d duplicate-code -d module-in-directory-without-init \
 	    --ignore migrations \
-	    *.py tcms_settings_dir/ tcms_openproject/ test_project/
+	    *.py tcms_settings_dir/ trackers_integration/ test_project/
 
 
 .PHONY: flake8
 flake8:
-	flake8 *.py tcms_settings_dir/ tcms_openproject/ test_project/
+	flake8 *.py tcms_settings_dir/ trackers_integration/ test_project/
 
 
 .PHONY: check

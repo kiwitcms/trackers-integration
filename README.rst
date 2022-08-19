@@ -1,8 +1,8 @@
-Issue Tracker integration between OpenProject and Kiwi TCMS
-===========================================================
+Extra Issue Tracker integration for Kiwi TCMS
+=============================================
 
-.. image:: https://pyup.io/repos/github/kiwitcms/openproject/shield.svg
-    :target: https://pyup.io/repos/github/kiwitcms/openproject/
+.. image:: https://pyup.io/repos/github/kiwitcms/trackers-integration/shield.svg
+    :target: https://pyup.io/repos/github/kiwitcms/trackers-integration/
     :alt: Python updates
 
 .. image:: https://opencollective.com/kiwitcms/tiers/sponsor/badge.svg?label=sponsors&color=brightgreen
@@ -17,7 +17,8 @@ Issue Tracker integration between OpenProject and Kiwi TCMS
 Introduction
 ------------
 
-This package provides Issue Tracker integration between OpenProject and Kiwi TCMS.
+This package provides Issue Tracker integration between Kiwi TCMS and
+various Issue Trackers.
 
 TODO - add more
 
