@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+    # build our own modified image to make it easier for testing
+    bugtracker_kiwitcms_org:
+        container_name: bugtracker_kiwitcms_org
+        image: openproject/community:12
+        restart: always
+        ports:
+            - 80:80
+        environment:
+            OPENPROJECT_SECRET_KEY_BASE: secret
+            OPENPROJECT_HOST__NAME: bugtracker.kiwitcms.org
+            OPENPROJECT_HTTPS: "false"
