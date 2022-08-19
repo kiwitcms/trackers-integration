@@ -3,5 +3,5 @@
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=undefined-variable
 
-if "trackers_integration.openproject.Integration" not in EXTERNAL_BUG_TRACKERS:   # noqa: F821
-    EXTERNAL_BUG_TRACKERS.append("trackers_integration.openproject.Integration")  # noqa: F821
+if "trackers_integration.issuetracker.OpenProject" not in EXTERNAL_BUG_TRACKERS:   # noqa: F821
+    EXTERNAL_BUG_TRACKERS.append("trackers_integration.issuetracker.OpenProject")  # noqa: F821
