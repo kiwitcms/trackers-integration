@@ -37,6 +37,8 @@ jobs:
     # runs the tests. Some trackers may end up with empty initialization!
     - name: Install Python dependencies
       run: |
+        make checkout_kiwi
+
         pip install -U pip
         pip install -r devel.txt
 
@@ -47,7 +49,7 @@ jobs:
     - name: Execute tests
       run: |
         export LANG=en-us
-        coverage run --source='.' ./manage.py test -v2 --noinput tracker_integration.tests.test_${{ matrix.tracker }}
+        PYTHONPATH=.:../Kiwi coverage run --source='.' ./manage.py test -v2 --noinput tracker_integration.tests.test_${{ matrix.tracker }}
 
     - name: Send coverage to codecov.io
       uses: codecov/codecov-action@v3
