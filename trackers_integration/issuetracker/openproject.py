@@ -2,11 +2,15 @@
 #
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
+import re
 import requests
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
 
 from tcms.issuetracker import base
+
+
+RE_MATCH_INT = re.compile(r"work_packages/([\d]+)/activity$")
 
 
 class API:
@@ -68,6 +72,9 @@ class OpenProject(base.IssueTrackerType):
 
     def is_adding_testcase_to_issue_disabled(self):
         return not (self.bug_system.base_url and self.bug_system.api_password)
+
+    def bug_id_from_url(cls, url):
+        return int(RE_MATCH_INT.search(url.strip()).group(1))
 
     def _report_issue(self, execution, user):
         raise NotImplementedError
