@@ -1,3 +1,13 @@
 #!/bin/bash
 
+# wait for OpenProject to initialize
+COUNTER=0
+TARGET_URL=${1:-http://bugtracker.kiwitcms.org/projects/your-scrum-project/work_packages/16/activity}
+while [[ "$(curl -s -o /dev/null -w '%{http_code}' $TARGET_URL)" != "200" && $COUNTER -lt 20 ]]; do
+    echo "INFO: $COUNTER - Not ready yet ....."
+    let COUNTER=COUNTER+1
+    sleep 20
+done
+
+
 ./tests/openproject/initialize-data.py
