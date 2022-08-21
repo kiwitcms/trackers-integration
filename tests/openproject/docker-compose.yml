@@ -12,3 +12,5 @@ services:
             OPENPROJECT_SECRET_KEY_BASE: secret
             OPENPROJECT_HOST__NAME: bugtracker.kiwitcms.org
             OPENPROJECT_HTTPS: "false"
+        volumes:
+          - ./seeds.rb:/app/db/seeds.rb
