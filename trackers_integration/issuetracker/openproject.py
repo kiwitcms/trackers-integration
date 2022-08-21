@@ -15,16 +15,12 @@ RE_MATCH_INT = re.compile(r"work_packages/([\d]+)/activity$")
 
 class API:
     def __init__(self, base_url=None, password=None):
-        self.headers = {
-            "Accept": "application/json-patch+json",
-            "Content-type": "application/json-patch+json",
-        }
         self.auth = HTTPBasicAuth("apikey", password)
-        self.base_url = base_url + "/_apis/"
+        self.base_url = f"{base_url}/api/v3"
 
     def get_issue(self, issue_id):
-        url = f"{self.base_url}....."
-        return self._request("GET", url, headers=self.headers, auth=self.auth)
+        url = f"{self.base_url}/work_packages/{issue_id}"
+        return self._request("GET", url, auth=self.auth)
 
     def create_issue(self, body):
         raise NotImplementedError
@@ -80,4 +76,10 @@ class OpenProject(base.IssueTrackerType):
         raise NotImplementedError
 
     def details(self, url):
-        raise NotImplementedError
+        issue = self.rpc.get_issue(self.bug_id_from_url(url))
+        issue_type = issue["_embedded"]["type"]["name"].upper()
+        status = issue["_embedded"]["status"]["name"].upper()
+        return {
+            "title": f"{status} {issue_type}: " + issue["subject"],
+            "description": issue["description"]["html"],
+        }
