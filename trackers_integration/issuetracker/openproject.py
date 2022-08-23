@@ -4,10 +4,10 @@
 
 import re
 import requests
-from django.conf import settings
 from requests.auth import HTTPBasicAuth
 
 from tcms.issuetracker import base
+from tcms.core.templatetags.extra_filters import markdown2html
 
 
 RE_MATCH_INT = re.compile(r"work_packages/([\d]+)/activity$")
@@ -69,6 +69,7 @@ class OpenProject(base.IssueTrackerType):
     def is_adding_testcase_to_issue_disabled(self):
         return not (self.bug_system.base_url and self.bug_system.api_password)
 
+    @classmethod
     def bug_id_from_url(cls, url):
         return int(RE_MATCH_INT.search(url.strip()).group(1))
 
