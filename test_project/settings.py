@@ -28,7 +28,9 @@ if os.path.exists(os.path.join(BASE_DIR, "kiwitcms_trackers_integration.egg-info
     sys.exit(1)
 
 # import the settings which automatically get distributed with this package
-openproject_settings = os.path.join(BASE_DIR, "tcms_settings_dir", "trackers_integration.py")
+openproject_settings = os.path.join(
+    BASE_DIR, "tcms_settings_dir", "trackers_integration.py"
+)
 
 # Kiwi TCMS loads extra settings in the same way using exec()
 exec(  # pylint: disable=exec-used

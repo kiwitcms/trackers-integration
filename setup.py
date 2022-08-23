@@ -36,7 +36,9 @@ setup(
     include_package_data=True,
     packages=find_packages(exclude=["test_project*", "*.tests"]),
     zip_safe=False,
-    entry_points={"kiwitcms.plugins": ["kiwitcms_trackers_integration = trackers_integration"]},
+    entry_points={
+        "kiwitcms.plugins": ["kiwitcms_trackers_integration = trackers_integration"]
+    },
     classifiers=[
         "Framework :: Django",
         "Development Status :: 5 - Production/Stable",
