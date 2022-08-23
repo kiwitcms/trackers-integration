@@ -7,11 +7,12 @@ on:
 
 jobs:
   integration:
-    name: ${{ matrix.tracker }}
+    name: ${{ matrix.tracker }} / ${{ matrix.kiwitcms-url }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        kiwitcms-url: [tcms.kiwitcms.org, public.tenant.kiwitcms.org]
         python-version: [3.8]
         tracker: [openproject]
 
@@ -46,9 +47,29 @@ jobs:
       run: |
         ./tests/${{ matrix.tracker }}/initialize-data
 
+    - name: Configure ~/.tcms.conf for ${{ matrix.kiwitcms-url }}
+      run: |
+        echo "[tcms]" > ~/.tcms.conf
+        echo "url = https://${{ matrix.kiwitcms-url }}/xml-rpc/" >> ~/.tcms.conf
+        echo "username = kiwitcms-bot" >> ~/.tcms.conf
+        echo "password = ${{ secrets.TCMS_PASSWORD }}" >> ~/.tcms.conf
+
     - name: Execute tests
       run: |
         export LANG=en-us
+
+        # report to Kiwi TCMS only if we have access to secrets
+        if [ -n "${{ secrets.TCMS_PASSWORD }}" ]; then
+          export DJANGO_TEST_RUNNER="tcms_django_plugin.TestRunner"
+          export TCMS_PRODUCT=$GITHUB_REPOSITORY
+
+          # branch name or pull/123
+          export TCMS_PRODUCT_VERSION=$(echo $GITHUB_REF | sed "s|refs/heads/||" | sed "s|refs/||" | sed "s|/merge||")
+
+          # short commit number
+          export TCMS_BUILD=$(echo $GITHUB_SHA | cut -c1-7)
+        fi
+
         PYTHONPATH=.:../Kiwi coverage run --source='.' ./manage.py test -v2 --noinput trackers_integration.tests.test_${{ matrix.tracker }}
 
     - name: Send coverage to codecov.io
