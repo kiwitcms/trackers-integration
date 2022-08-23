@@ -43,8 +43,8 @@ TEMPLATE_DEBUG = True
 
 
 # start multi-tenant settings override
-DATABASES["default"].update(
-    {  # noqa: F405 pylint: disable=objects-update-used
+DATABASES["default"].update(  # noqa: F405 pylint: disable=objects-update-used
+    {
         "NAME": "test_project",
         "USER": "kiwi",
         "PASSWORD": "kiwi",
