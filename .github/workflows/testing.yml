@@ -56,3 +56,34 @@ jobs:
       with:
         fail_ci_if_error: true
         verbose: true
+
+  lint:
+    name: ${{ matrix.tracker }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    # install all dev dependencies here b/c these steps are now part of a
+    # job matrix which unconditionally initializes the bugtracker DB and
+    # runs the tests. Some trackers may end up with empty initialization!
+    - name: Install Python dependencies
+      run: |
+        make checkout_kiwi
+
+        pip install -U pip
+        pip install -r devel.txt
+
+    - name: Execute tests
+      run: |
+        export LANG=en-us
+        make check
