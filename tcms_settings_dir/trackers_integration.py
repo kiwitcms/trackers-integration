@@ -4,8 +4,9 @@
 # pylint: disable=undefined-variable
 
 if (
-    "trackers_integration.issuetracker.OpenProject" not in EXTERNAL_BUG_TRACKERS
-):  # noqa: F821
-    EXTERNAL_BUG_TRACKERS.append(
+    "trackers_integration.issuetracker.OpenProject"
+    not in EXTERNAL_BUG_TRACKERS  # noqa: F821
+):
+    EXTERNAL_BUG_TRACKERS.append(  # noqa: F821
         "trackers_integration.issuetracker.OpenProject"
-    )  # noqa: F821
+    )
