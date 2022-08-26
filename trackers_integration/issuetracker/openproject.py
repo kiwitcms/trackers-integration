@@ -36,9 +36,6 @@ class API:
         url = f"{self.base_url}/work_packages/{issue_id}/activities"
         return self._request("POST", url, headers=headers, auth=self.auth, json=body)
 
-    def delete_comment(self, issue_id, comment_id):
-        raise NotImplementedError
-
     @staticmethod
     def _request(method, url, **kwargs):
         return requests.request(method, url, **kwargs).json()
