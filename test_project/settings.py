@@ -17,7 +17,7 @@ entry_point = pkg_resources.EntryPoint.parse(
 dist._ep_map = {"kiwitcms.plugins": {"trackers_integration_devel": entry_point}}
 pkg_resources.working_set.add(dist)
 
-from tcms.settings.test import *  # noqa: E402, F403
+from tcms.settings.devel import *  # noqa: E402, F403
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, BASE_DIR)
@@ -37,24 +37,6 @@ exec(  # pylint: disable=exec-used
     open(openproject_settings, "rb").read(),  # pylint: disable=consider-using-with
     globals(),
 )
-
-
-# these are enabled only for testing purposes
-DEBUG = True
-TEMPLATE_DEBUG = True
-
-
-# start multi-tenant settings override
-DATABASES["default"].update(  # noqa: F405 pylint: disable=objects-update-used
-    {
-        "NAME": "test_project",
-        "USER": "kiwi",
-        "PASSWORD": "kiwi",
-        "HOST": "localhost",
-        "OPTIONS": {},
-    }
-)
-
 
 if "test_app" not in INSTALLED_APPS:  # noqa: F405
     INSTALLED_APPS.append("test_project.test_app")  # noqa: F405
