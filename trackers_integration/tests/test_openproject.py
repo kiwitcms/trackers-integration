@@ -6,6 +6,7 @@
 
 from django.utils import timezone
 
+from tcms.core.contrib.linkreference.models import LinkReference
 from tcms.rpc.tests.utils import APITestCase
 from tcms.testcases.models import BugSystem
 from tcms.tests.factories import ComponentFactory, TestExecutionFactory
@@ -92,7 +93,39 @@ class TestOpenProjectIntegration(APITestCase):
             self.assertIn(expected_string, last_comment["comment"]["raw"])
 
     def test_report_issue_from_test_execution_1click_works(self):
-        pass
+        # simulate user clicking the 'Report bug' button in TE widget, TR page
+        result = self.rpc_client.Bug.report(
+            self.execution_1.pk, self.integration.bug_system.pk
+        )
+        self.assertEqual(result["rc"], 0)
+        self.assertIn(self.integration.bug_system.base_url, result["response"])
+        self.assertIn("/work_packages/", result["response"])
+
+        new_issue_id = self.integration.bug_id_from_url(result["response"])
+        issue = self.integration.rpc.get_workpackage(new_issue_id)
+
+        self.assertEqual(
+            f"Failed test: {self.execution_1.case.summary}",
+            issue["subject"],
+        )
+        for expected_string in [
+            f"Filed from execution {self.execution_1.get_full_url()}",
+            "Reporter",
+            self.execution_1.run.plan.product.name,
+            self.component.name,
+            "Steps to reproduce",
+            self.execution_1.case.text,
+        ]:
+            self.assertIn(expected_string, issue["description"]["raw"])
+
+        # verify that LR has been added to TE
+        self.assertTrue(
+            LinkReference.objects.filter(
+                execution=self.execution_1,
+                url=result["response"],
+                is_defect=True,
+            ).exists()
+        )
 
     def test_report_issue_from_test_execution_empty_baseurl_exception(self):
         pass

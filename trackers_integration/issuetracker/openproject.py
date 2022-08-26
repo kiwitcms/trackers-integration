@@ -2,10 +2,16 @@
 #
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
+import json
 import re
+from urllib.parse import urlencode
+
 import requests
 from requests.auth import HTTPBasicAuth
 
+from django.conf import settings
+
+from tcms.core.contrib.linkreference.models import LinkReference
 from tcms.issuetracker import base
 
 
@@ -17,15 +23,14 @@ class API:
         self.auth = HTTPBasicAuth("apikey", password)
         self.base_url = f"{base_url}/api/v3"
 
-    def get_issue(self, issue_id):
+    def get_workpackage(self, issue_id):
         url = f"{self.base_url}/work_packages/{issue_id}"
         return self._request("GET", url, auth=self.auth)
 
-    def create_issue(self, body):
-        raise NotImplementedError
-
-    def update_issue(self, issue_id, body):
-        raise NotImplementedError
+    def create_workpackage(self, project_id, body):
+        headers = {"Content-type": "application/json"}
+        url = f"{self.base_url}/projects/{project_id}/work_packages"
+        return self._request("POST", url, headers=headers, auth=self.auth, json=body)
 
     def get_comments(self, issue_id):
         url = f"{self.base_url}/work_packages/{issue_id}/activities"
@@ -39,6 +44,31 @@ class API:
     @staticmethod
     def _request(method, url, **kwargs):
         return requests.request(method, url, **kwargs).json()
+
+    def get_projects(self, name=None):
+        url = f"{self.base_url}/projects"
+        if name:
+            params = urlencode(
+                {
+                    "filters": json.dumps(
+                        [
+                            {
+                                "name_and_identifier": {
+                                    "operator": "~",
+                                    "values": [name],
+                                }
+                            }
+                        ]
+                    )
+                },
+                True,
+            )
+            url += f"?{params}"
+        return self._request("GET", url, auth=self.auth)
+
+    def get_workpackage_types(self, project_id):
+        url = f"{self.base_url}/projects/{project_id}/types"
+        return self._request("GET", url, auth=self.auth)
 
 
 class ThreadRunner(base.IntegrationThread):
@@ -72,11 +102,69 @@ class OpenProject(base.IssueTrackerType):
     def bug_id_from_url(cls, url):
         return int(RE_MATCH_INT.search(url.strip()).group(1))
 
+    def get_project_by_name(self, name):
+        """
+        Return a Project which matches the given product name.
+        If there is no match then return the first project in the database!
+        """
+        # NOTE: name filtering is done directly via the API query
+        try:
+            projects = self.rpc.get_projects(name)
+
+            # nothing would be found, default to 1st project
+            if not projects["_embedded"]["elements"]:
+                projects = self.rpc.get_projects()
+
+            return projects["_embedded"]["elements"][0]
+        except Exception as err:
+            raise RuntimeError("Project not found") from err
+
+    def get_workpackage_type(self, project_id, name):
+        """
+        Return a WorkPackage type, preferably `Bug`.
+        If there is no match then return the first one!
+        """
+        types = self.rpc.get_workpackage_types(project_id)
+        for _type in types["_embedded"]["elements"]:
+            if _type["name"].lower() == name.lower():
+                return _type
+
+        return types["_embedded"]["elements"][0]
+
     def _report_issue(self, execution, user):
-        raise NotImplementedError
+        project = self.get_project_by_name(execution.run.plan.product.name)
+        project_id = project["id"]
+        project_identifier = project["identifier"]
+
+        _type = self.get_workpackage_type(
+            project_id, getattr(settings, "OPENPROJECT_WORKPACKAGE_TYPE_NAME", "Bug")
+        )
+
+        new_issue = self.rpc.create_workpackage(
+            project_id,
+            {
+                "subject": f"Failed test: {execution.case.summary}",
+                "description": {"raw": self._report_comment(execution, user)},
+                "_links": {
+                    "type": _type["_links"]["self"],
+                },
+            },
+        )
+
+        _id = new_issue["id"]
+        new_url = f"{self.bug_system.base_url}/projects/{project_identifier}/work_packages/{_id}"
+
+        # and also add a link reference that will be shown in the UI
+        LinkReference.objects.get_or_create(
+            execution=execution,
+            url=new_url,
+            is_defect=True,
+        )
+
+        return (new_issue, new_url)
 
     def details(self, url):
-        issue = self.rpc.get_issue(self.bug_id_from_url(url))
+        issue = self.rpc.get_workpackage(self.bug_id_from_url(url))
         issue_type = issue["_embedded"]["type"]["name"].upper()
         status = issue["_embedded"]["status"]["name"].upper()
         return {
