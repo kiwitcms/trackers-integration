@@ -7,10 +7,9 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from tcms.issuetracker import base
-from tcms.core.templatetags.extra_filters import markdown2html
 
 
-RE_MATCH_INT = re.compile(r"work_packages/([\d]+)/activity$")
+RE_MATCH_INT = re.compile(r"work_packages/([\d]+)(/activity)*$")
 
 
 class API:
@@ -29,10 +28,13 @@ class API:
         raise NotImplementedError
 
     def get_comments(self, issue_id):
-        raise NotImplementedError
+        url = f"{self.base_url}/work_packages/{issue_id}/activities"
+        return self._request("GET", url, auth=self.auth)
 
     def add_comment(self, issue_id, body):
-        raise NotImplementedError
+        headers = {"Content-type": "application/json"}
+        url = f"{self.base_url}/work_packages/{issue_id}/activities"
+        return self._request("POST", url, headers=headers, auth=self.auth, json=body)
 
     def delete_comment(self, issue_id, comment_id):
         raise NotImplementedError
@@ -44,7 +46,7 @@ class API:
 
 class ThreadRunner(base.IntegrationThread):
     def post_comment(self):
-        comment_body = {"text": markdown2html(self.text())}
+        comment_body = {"comment": {"raw": self.text()}}
         self.rpc.add_comment(self.bug_id, comment_body)
 
 

@@ -55,7 +55,41 @@ class TestOpenProjectIntegration(APITestCase):
         self.assertEqual("", result["description"])
 
     def test_auto_update_bugtracker(self):
-        pass
+        last_comment = None
+        initial_comments = self.integration.rpc.get_comments(self.existing_bug_id)
+
+        # simulate user adding a new bug URL to a TE and clicking
+        # 'Automatically update bug tracker'
+        result = self.rpc_client.TestExecution.add_link(
+            {
+                "execution_id": self.execution_1.pk,
+                "is_defect": True,
+                "url": self.existing_bug_url,
+            },
+            True,
+        )
+
+        # making sure RPC above returned the same URL
+        self.assertEqual(self.existing_bug_url, result["url"])
+
+        # wait until comments have been refreshed b/c this seem to happen async
+        initial_comments_length = initial_comments["count"]
+        current_comments_length = initial_comments_length
+        while current_comments_length != initial_comments_length + 1:
+            comments = self.integration.rpc.get_comments(self.existing_bug_id)
+            current_comments_length = comments["count"]
+
+        last_comment = comments["_embedded"]["elements"][-1]
+
+        # assert that a comment has been added as the last one
+        # and also verify its text
+        for expected_string in [
+            "Confirmed via test execution",
+            f"TR-{self.execution_1.run_id}: {self.execution_1.run.summary}",
+            self.execution_1.run.get_full_url(),
+            f"TE-{self.execution_1.pk}: {self.execution_1.case.summary}",
+        ]:
+            self.assertIn(expected_string, last_comment["comment"]["raw"])
 
     def test_report_issue_from_test_execution_1click_works(self):
         pass
