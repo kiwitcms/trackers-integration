@@ -126,6 +126,3 @@ class TestOpenProjectIntegration(APITestCase):
                 is_defect=True,
             ).exists()
         )
-
-    def test_report_issue_from_test_execution_empty_baseurl_exception(self):
-        pass
