@@ -144,12 +144,12 @@ class OpenProject(base.IssueTrackerType):
         If there is no match then return the first one!
 
         """
-        types = self.rpc.get_workpackage_types(project_id)
-        for _type in types["_embedded"]["elements"]:
-            if _type["name"].lower() == name.lower():
-                return _type
-
         try:
+            types = self.rpc.get_workpackage_types(project_id)
+            for _type in types["_embedded"]["elements"]:
+                if _type["name"].lower() == name.lower():
+                    return _type
+
             return types["_embedded"]["elements"][0]
         except Exception as err:
             raise RuntimeError("WorkPackage Type not found") from err
