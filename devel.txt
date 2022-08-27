@@ -3,6 +3,7 @@
 black
 coverage
 flake8
+parameterized
 pylint==2.14.5
 pylint-django
 kiwitcms-django-plugin
