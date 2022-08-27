@@ -4,7 +4,7 @@
 #
 # pylint: disable=attribute-defined-outside-init
 
-from django.test import TestCase
+from django.test import override_settings, TestCase
 from django.utils import timezone
 
 from parameterized import parameterized
@@ -129,6 +129,20 @@ class TestOpenProjectIntegration(APITestCase):
                 is_defect=True,
             ).exists()
         )
+
+    def test_report_issue_with_overriden_workpackage_type_name(self):
+        with override_settings(OPENPROJECT_WORKPACKAGE_TYPE_NAME="Epic"):
+            # simulate user clicking the 'Report bug' button in TE widget, TR page
+            result = self.rpc_client.Bug.report(
+                self.execution_1.pk, self.integration.bug_system.pk
+            )
+            self.assertEqual(result["rc"], 0)
+            self.assertIn(self.integration.bug_system.base_url, result["response"])
+            self.assertIn("/work_packages/", result["response"])
+
+            new_issue_id = self.integration.bug_id_from_url(result["response"])
+            issue = self.integration.rpc.get_workpackage(new_issue_id)
+            self.assertEqual(issue["_links"]["type"]["title"], "Epic")
 
 
 class TestOpenProjectInternalImplementation(TestCase):
