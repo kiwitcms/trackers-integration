@@ -79,10 +79,17 @@ class ThreadRunner(base.IntegrationThread):
 
 class OpenProject(base.IssueTrackerType):
     """
+    .. versionadded:: Kiwi TCMS Enterprise 11.5
+
     Support for OpenProject. Requires:
 
     :base_url: URL to OpenProject instance - e.g. https://kiwitcms.openproject.com/
     :api_password: API token
+
+    .. important::
+
+        Can be controlled via the ``OPENPROJECT_WORKPACKAGE_TYPE_NAME`` configuration
+        setting (in ``product.py``).
 
     .. note::
 
@@ -100,14 +107,26 @@ class OpenProject(base.IssueTrackerType):
 
     @classmethod
     def bug_id_from_url(cls, url):
+        """
+        Returns a WorkPackage ID from a URL of the form
+        [projects/short-identifier]/work_packages/1234[/activity]
+        """
         return int(RE_MATCH_INT.search(url.strip()).group(1))
 
     def get_project_by_name(self, name):
         """
-        Return a Project which matches the given product name.
-        If there is no match then return the first project in the database!
+        Return a Project which matches the product name from Kiwi TCMS
+        for which we're reporting bugs!
+
+        .. important::
+
+            Name search is done via the OpenProject API and will try to match
+            either name or project identifier. In case multiple matches were found
+            the first one will be returned!
+
+            If there is no match by name return the first of all projects in the
+            OpenProject database!
         """
-        # NOTE: name filtering is done directly via the API query
         try:
             projects = self.rpc.get_projects(name)
 
@@ -121,8 +140,9 @@ class OpenProject(base.IssueTrackerType):
 
     def get_workpackage_type(self, project_id, name):
         """
-        Return a WorkPackage type, preferably `Bug`.
+        Return a WorkPackage type matching by name, preferably `Bug`.
         If there is no match then return the first one!
+
         """
         types = self.rpc.get_workpackage_types(project_id)
         for _type in types["_embedded"]["elements"]:
@@ -133,6 +153,8 @@ class OpenProject(base.IssueTrackerType):
             return types["_embedded"]["elements"][0]
         except Exception as err:
             raise RuntimeError("WorkPackage Type not found") from err
+
+
 
     def _report_issue(self, execution, user):
         project = self.get_project_by_name(execution.run.plan.product.name)
@@ -167,6 +189,9 @@ class OpenProject(base.IssueTrackerType):
         return (new_issue, new_url)
 
     def details(self, url):
+        """
+        Fetches WorkPackage details from OpenProject to be displayed in tooltips.
+        """
         issue = self.rpc.get_workpackage(self.bug_id_from_url(url))
         issue_type = issue["_embedded"]["type"]["name"].upper()
         status = issue["_embedded"]["status"]["name"].upper()
