@@ -129,7 +129,10 @@ class OpenProject(base.IssueTrackerType):
             if _type["name"].lower() == name.lower():
                 return _type
 
-        return types["_embedded"]["elements"][0]
+        try:
+            return types["_embedded"]["elements"][0]
+        except Exception as err:
+            raise RuntimeError("WorkPackage Type not found") from err
 
     def _report_issue(self, execution, user):
         project = self.get_project_by_name(execution.run.plan.product.name)
