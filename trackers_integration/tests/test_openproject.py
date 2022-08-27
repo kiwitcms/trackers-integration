@@ -4,7 +4,10 @@
 #
 # pylint: disable=attribute-defined-outside-init
 
+from django.test import TestCase
 from django.utils import timezone
+
+from parameterized import parameterized
 
 from tcms.core.contrib.linkreference.models import LinkReference
 from tcms.rpc.tests.utils import APITestCase
@@ -126,3 +129,57 @@ class TestOpenProjectIntegration(APITestCase):
                 is_defect=True,
             ).exists()
         )
+
+
+class TestOpenProjectInternalImplementation(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
+            name="OpenProject for kiwitcms/trackers-integration",
+            tracker_type="trackers_integration.issuetracker.OpenProject",
+            base_url="http://bugtracker.kiwitcms.org",
+            api_password="26210315639327b10b56b7ef5d2f47f843c0ced3bafd1540fd4ecb30a06fa80f",
+        )
+        cls.openproject = OpenProject(bug_system, None)
+
+    @parameterized.expand(
+        [
+            (
+                "no_project_prefix_no_activity_suffix",
+                "http://bugtracker.kiwitcms.org/work_packages/8",
+            ),
+            (
+                "no_project_prefix_yes_activity_suffix",
+                "http://bugtracker.kiwitcms.org/work_packages/8/activity",
+            ),
+            (
+                "yes_project_prefix_no_activity_suffix",
+                "http://bugtracker.kiwitcms.org/projects/demo-project/work_packages/8",
+            ),
+            (
+                "yes_project_prefix_yes_activity_suffix",
+                "http://bugtracker.kiwitcms.org/projects/demo-project/work_packages/8/activity",
+            ),
+        ]
+    )
+    def test_bug_id_from_url(self, _name, existing_bug_url):
+        result = self.openproject.bug_id_from_url(existing_bug_url)
+        self.assertEqual(result, 8)
+
+    def test_workpackage_type_with_name_match(self):
+        project = self.openproject.get_project_by_name("Scrum project")
+        result = self.openproject.get_workpackage_type(project["id"], "Bug")
+        # Scrum project has Bug
+        self.assertEqual(result["name"], "Bug")
+
+    def test_workpackage_type_fallback_to_first(self):
+        project = self.openproject.get_project_by_name("Demo project")
+        result = self.openproject.get_workpackage_type(project["id"], "Bug")
+        # Demo project doesn't have Bug, but has Task
+        self.assertEqual(result["name"], "Task")
+
+    def test_workpackage_type_exception(self):
+        with self.assertRaisesRegex(RuntimeError, "WorkPackage Type not found"):
+            self.openproject.get_workpackage_type(-1, "Bug")
