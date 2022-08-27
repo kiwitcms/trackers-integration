@@ -183,3 +183,15 @@ class TestOpenProjectInternalImplementation(TestCase):
     def test_workpackage_type_exception(self):
         with self.assertRaisesRegex(RuntimeError, "WorkPackage Type not found"):
             self.openproject.get_workpackage_type(-1, "Bug")
+
+    def test_get_project_by_name_match(self):
+        result = self.openproject.get_project_by_name("Scrum project")
+        self.assertEqual(result["name"], "Scrum project")
+
+    def test_get_project_by_name_search_identifier(self):
+        result = self.openproject.get_project_by_name("demo-project")
+        self.assertEqual(result["name"], "Demo project")
+
+    def test_get_project_by_name_fallback_to_first(self):
+        result = self.openproject.get_project_by_name("Non Existent Project")
+        self.assertEqual(result["name"], "Scrum project")
