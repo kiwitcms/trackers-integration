@@ -43,7 +43,7 @@ class API:
 
     @staticmethod
     def _request(method, url, **kwargs):
-        return requests.request(method, url, **kwargs).json()
+        return requests.request(method, url, timeout=30, **kwargs).json()
 
     def get_projects(self, name=None):
         url = f"{self.base_url}/projects"
