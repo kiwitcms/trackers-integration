@@ -22,6 +22,7 @@ class API:
     """
     :meta private:
     """
+
     def __init__(self, base_url=None, password=None):
         self.auth = HTTPBasicAuth("apikey", password)
         self.base_url = f"{base_url}/api/v3"
@@ -78,6 +79,7 @@ class ThreadRunner(base.IntegrationThread):
     """
     :meta private:
     """
+
     def post_comment(self):
         comment_body = {"comment": {"raw": self.text()}}
         self.rpc.add_comment(self.bug_id, comment_body)
