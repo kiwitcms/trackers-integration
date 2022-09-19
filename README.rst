@@ -20,11 +20,6 @@ Introduction
 This package provides Issue Tracker integration between Kiwi TCMS and
 various Issue Trackers.
 
-TODO - add more
-
-Installation
-------------
-
 Changelog
 ---------
 
