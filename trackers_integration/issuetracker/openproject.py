@@ -19,6 +19,9 @@ RE_MATCH_INT = re.compile(r"work_packages/([\d]+)(/activity)*$")
 
 
 class API:
+    """
+    :meta private:
+    """
     def __init__(self, base_url=None, password=None):
         self.auth = HTTPBasicAuth("apikey", password)
         self.base_url = f"{base_url}/api/v3"
@@ -72,6 +75,9 @@ class API:
 
 
 class ThreadRunner(base.IntegrationThread):
+    """
+    :meta private:
+    """
     def post_comment(self):
         comment_body = {"comment": {"raw": self.text()}}
         self.rpc.add_comment(self.bug_id, comment_body)
@@ -79,22 +85,22 @@ class ThreadRunner(base.IntegrationThread):
 
 class OpenProject(base.IssueTrackerType):
     """
-    .. versionadded:: Kiwi TCMS Enterprise 11.5
+    .. versionadded:: 11.6-Enterprise
 
-    Support for OpenProject. Requires:
+    Support for `OpenProject <https://www.openproject.org/>`_ - open source
+    project management software.
+
+    .. warning::
+
+        Make sure that this package is installed inside Kiwi TCMS and that
+        ``EXTERNAL_BUG_TRACKERS`` setting contains a dotted path reference to
+        this class! When using *Kiwi TCMS Enterprise* this is configured
+        automatically.
+
+    **Authentication**:
 
     :base_url: URL to OpenProject instance - e.g. https://kiwitcms.openproject.com/
     :api_password: API token
-
-    .. important::
-
-        Can be controlled via the ``OPENPROJECT_WORKPACKAGE_TYPE_NAME`` configuration
-        setting (in ``product.py``).
-
-    .. note::
-
-        You can leave the ``api_url`` and ``api_username`` fields blank because
-        the integration code doesn't use them!
     """
 
     it_class = ThreadRunner
@@ -103,13 +109,16 @@ class OpenProject(base.IssueTrackerType):
         return API(self.bug_system.base_url, self.bug_system.api_password)
 
     def is_adding_testcase_to_issue_disabled(self):
+        """
+        :meta private:
+        """
         return not (self.bug_system.base_url and self.bug_system.api_password)
 
     @classmethod
     def bug_id_from_url(cls, url):
         """
         Returns a WorkPackage ID from a URL of the form
-        [projects/short-identifier]/work_packages/1234[/activity]
+        ``[projects/short-identifier]/work_packages/1234[/activity]``
         """
         return int(RE_MATCH_INT.search(url.strip()).group(1))
 
@@ -140,9 +149,11 @@ class OpenProject(base.IssueTrackerType):
 
     def get_workpackage_type(self, project_id, name):
         """
-        Return a WorkPackage type matching by name, preferably `Bug`.
+        Return a WorkPackage type matching by name, defaults to ``Bug``.
         If there is no match then return the first one!
 
+        Can be controlled via the ``OPENPROJECT_WORKPACKAGE_TYPE_NAME``
+        configuration setting!
         """
         try:
             types = self.rpc.get_workpackage_types(project_id)
