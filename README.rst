@@ -23,5 +23,8 @@ various Issue Trackers.
 Changelog
 ---------
 
-v0.1.1 (04 April 2019) - initial release
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+v0.1.1 (20 Sep 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Initial release
+- Support for OpenProject
