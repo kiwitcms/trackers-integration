@@ -23,7 +23,7 @@ various Issue Trackers.
 Changelog
 ---------
 
-v0.1.1 (20 Sep 2022)
+v0.2.0 (20 Sep 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
 - Initial release
