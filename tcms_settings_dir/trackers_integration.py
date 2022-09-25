@@ -10,3 +10,11 @@ if (
     EXTERNAL_BUG_TRACKERS.append(  # noqa: F821
         "trackers_integration.issuetracker.OpenProject"
     )
+
+if (
+    "trackers_integration.issuetracker.Mantis"
+    not in EXTERNAL_BUG_TRACKERS  # noqa: F821
+):
+    EXTERNAL_BUG_TRACKERS.append(  # noqa: F821
+        "trackers.integration.issuetracker.Mantis"
+    )
