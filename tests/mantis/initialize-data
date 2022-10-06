@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# URL is https://<address>:8443/mantisbt/
+
+# default login is administrator/root
+# MantisBT also supports API tokens which we should use
+
+# There are no projects by default
+# There is a global category called 'General'
+# There are no other user accounts created by default
