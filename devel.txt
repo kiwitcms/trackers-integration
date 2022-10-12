@@ -6,3 +6,5 @@ flake8
 parameterized
 pylint-django
 kiwitcms-django-plugin
+robotframework
+robotframework-seleniumlibrary
