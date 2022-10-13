@@ -76,6 +76,8 @@ class MantisThread(IntegrationThread):
 
 class Mantis(IssueTrackerType):
     """
+    .. versionadded:: 11.6-Enterprise
+
     Support for Mantis. Requires:
 
     :base_url: URL to Mantis Server - e.g. https://mantisbt.org
@@ -102,8 +104,6 @@ class Mantis(IssueTrackerType):
 
         You may override this method if you want more control and customization,
         see https://kiwitcms.org/blog/tags/customization/
-
-        .. versionadded:: 11.4
         """
         projects = self.rpc.get_projects()["projects"]
         try:
