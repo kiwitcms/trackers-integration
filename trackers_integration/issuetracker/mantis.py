@@ -13,11 +13,11 @@ class MantisAPI:
     :meta private:
     """
 
-    def __init__(self, base_url=None, password=None):
+    def __init__(self, base_url=None, api_token=None):
         self.headers = {
             "Accept": "application/json-patch+json",
             "Content-type": "application/json-patch+json",
-            "Authorization": password,
+            "Authorization": api_token,
         }
         self.base_url = base_url + "/api/rest"
 
