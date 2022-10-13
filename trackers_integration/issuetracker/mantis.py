@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import requests
 
+from django.conf import settings
+
 from tcms.core.contrib.linkreference.models import LinkReference
 from tcms.core.templatetags.extra_filters import markdown2html
 from tcms.issuetracker.base import IntegrationThread, IssueTrackerType
@@ -143,7 +145,7 @@ class Mantis(IssueTrackerType):
 
     def get_project_from_mantis(self, product_name):
         """
-        Returns a project from the Mantis BT database.
+        Returns a Project from the Mantis BT database.
         Will try to match execution.run.plan.product.name or
         ``MANTIS_PROJECT_NAME`` configuration setting! Otherwise will
         return the first project found!
@@ -158,6 +160,22 @@ class Mantis(IssueTrackerType):
 
         return projects[0]
 
+    def get_category_from_mantis(
+        self, category_name, project
+    ):  # pylint: disable=no-self-use, unused-argument
+        """
+        Returns a Category from the Mantis BT database.
+        Will try to match ``MANTIS_CATEGORY_NAME`` configuration setting!
+        Otherwise will return "General"!
+
+        .. warning ::
+
+            At present Mantis BT doesn't appear to provide API methods for
+            creating or listing available categories inside a project. Because
+            of that this method will always return the "General" category!
+        """
+        return {"name": category_name}
+
     def _report_issue(self, execution, user):
         """
         Mantis creates the Issue with Title
@@ -168,11 +186,15 @@ class Mantis(IssueTrackerType):
                     settings, "MANTIS_PROJECT_NAME", execution.run.plan.product.name
                 )
             )
+            category = self.get_category_from_mantis(
+                getattr(settings, "MANTIS_CATEGORY_NAME", "General"),
+                project,
+            )
 
             issue = self.rpc.create_issue(
                 f"Failed test: {execution.case.summary}",
                 markdown2html(self._report_comment(execution, user)),
-                "General",
+                category["name"],
                 project["name"],
             )
 
