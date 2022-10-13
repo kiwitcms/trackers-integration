@@ -5,10 +5,11 @@ import unittest
 from django.utils import timezone
 
 from tcms.core.contrib.linkreference.models import LinkReference
-from tcms.issuetracker.mantis import Mantis, MantisAPI
 from tcms.rpc.tests.utils import APITestCase
 from tcms.testcases.models import BugSystem
 from tcms.tests.factories import ComponentFactory, TestExecutionFactory
+
+from trackers_integration.issuetracker.mantis import Mantis, MantisAPI
 
 
 class TestMantisIntegration(APITestCase):
