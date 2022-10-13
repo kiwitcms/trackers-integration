@@ -23,6 +23,13 @@ various Issue Trackers.
 Changelog
 ---------
 
+
+v0.3.0 (13 Oct 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Add support for Mantis BT with contributions from @cmbahadir
+
+
 v0.2.0 (20 Sep 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
