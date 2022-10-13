@@ -19,11 +19,63 @@ class MantisAPI:
             "Content-type": "application/json-patch+json",
             "Authorization": api_token,
         }
-        self.base_url = base_url + "/api/rest"
+        self.base_url = f"{base_url}/api/rest"
 
     def get_projects(self):
         url = f"{self.base_url}/projects"
         return self._request("GET", url, headers=self.headers)
+
+    def create_project(self, name, description = "", status = "development", is_public = True):
+        url = f"{self.base_url}/projects"
+
+        # these seem to be hard-coded and API docs don't show any methods
+        # related to Project Status
+        statuses = {
+            "development": {
+                "id": 10,
+                "name": "development",
+                "label": "development"
+            },
+            "release": {
+                "id": 30,
+                "name": "release",
+                "label": "release"
+            },
+            "stable": {
+                "id": 50,
+                "name": "stable",
+                "label": "stable"
+            },
+            "obsolete": {
+                "id": 70,
+                "name": "obsolete",
+                "label": "obsolete"
+            },
+        }
+
+        # these seem to be hard-coded and API docs don't show any methods
+        # related to Project View State
+        view_states = {
+            True: {
+                "id": 10,
+                "name": "public",
+                "label": "public"
+            },
+            False: {
+                "id": 50,
+                "name": "private",
+                "label": "private"
+            }
+        }
+
+        payload = {
+            "name": name,
+            "status": statuses[status],
+            "description": description,
+            "enabled": True,
+            "view_state": view_states[is_public],
+        }
+        return self._request("POST", url, headers=self.headers, json=payload)
 
     def get_issue(self, issue_id):
         url = f"{self.base_url}/issues/{issue_id}"

@@ -15,7 +15,6 @@ from trackers_integration.issuetracker.mantis import Mantis, MantisAPI
 class TestMantisIntegration(APITestCase):
     existing_bug_id = 1
     existing_bug_url = "http://localhost/rest/api/issues/1"
-    mantis_project = "Sample_Project"
 
     def _fixture_setup(self):
         super()._fixture_setup()
@@ -36,12 +35,17 @@ class TestMantisIntegration(APITestCase):
 
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Mantis for kiwitcms/test-mantis-integration",
-            tracker_type="tcms.issuetracker.mantis.Mantis",
-            base_url="http://localhost",
-            api_url=self.mantis_project,
-            api_password=os.getenv("MANTIS_INTEGRATION_API_PASSWORD"),
+            tracker_type="trackers_integration.issuetracker.Mantis",
+            base_url=os.getenv("MANTIS_URL", "https://bugtracker.kiwitcms.org:8443/mantisbt"),
+            api_password=os.getenv("MANTIS_API_TOKEN"),
         )
         self.integration = Mantis(bug_system, None)
+
+        # create more data in Mantis BT
+        self.bug_system.rpc.create_project("Kiwi TCMS")
+        self.bug_system.rpc.create_project("A private one", status = "stable", is_public = False)
+
+        # TODO: need to add global & local categories
 
     def test_bug_id_from_url(self):
         result = self.integration.bug_id_from_url(self.existing_bug_url)

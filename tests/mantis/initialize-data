@@ -6,17 +6,9 @@ BASE_DIR=$(dirname $0)
 
 # default login is administrator/root
 IP_ADDR=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' bugtracker_kiwitcms_org)
-URL="https://${IP_ADDR}:8443/mantisbt"
 
-export API_TOKEN=$(robot --variable IP_ADDR:${IP_ADDR} --quiet --log NONE --report NONE --output NONE ${BASE_DIR}/initialize.robot)
+export MANTIS_URL="https://${IP_ADDR}:8443/mantisbt"
+export MANTIS_API_TOKEN=$(robot --variable IP_ADDR:${IP_ADDR} --quiet --log NONE --report NONE --output NONE ${BASE_DIR}/initialize.robot)
 
-echo "$API_TOKEN"
-echo $URL
-
-# TODO: connect via API and create the following data:
-
-# There are no projects by default
-# Projects can be public or private
-
-# There is a global category called 'General'
-# Projects can have individual categories + inherit all global ones
+echo "$MANTIS_API_TOKEN"
+echo "$MANTIS_URL"
