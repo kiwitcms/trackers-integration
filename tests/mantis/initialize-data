@@ -1,14 +1,14 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 BASE_DIR=$(dirname $0)
 
 # default login is administrator/root
 IP_ADDR=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' bugtracker_kiwitcms_org)
 
-export MANTIS_URL="https://${IP_ADDR}:8443/mantisbt"
-export MANTIS_API_TOKEN=$(robot --variable IP_ADDR:${IP_ADDR} --quiet --log NONE --report NONE --output NONE ${BASE_DIR}/initialize.robot)
+MANTIS_URL="https://${IP_ADDR}:8443/mantisbt"
+MANTIS_API_TOKEN=$(robot --variable IP_ADDR:${IP_ADDR} --quiet --log NONE --report NONE --output NONE ${BASE_DIR}/initialize.robot)
 
-echo "$MANTIS_API_TOKEN"
-echo "$MANTIS_URL"
+echo "export MANTIS_API_TOKEN=${MANTIS_API_TOKEN}" > /tmp/env
+echo "export MANTIS_URL=${MANTIS_URL}" >> /tmp/env

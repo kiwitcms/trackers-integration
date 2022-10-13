@@ -56,6 +56,8 @@ jobs:
 
     - name: Execute tests
       run: |
+        # load any extra ENV vars that came from initialize-data
+        [ -f /tmp/env ] && source /tmp/env
         export LANG=en-us
 
         # report to Kiwi TCMS only if we have access to secrets
