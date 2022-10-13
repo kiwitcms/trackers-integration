@@ -1,6 +1,5 @@
-# pylint: disable=attribute-defined-outside-init
+# pylint: disable=attribute-defined-outside-init, protected-access
 import os
-import unittest
 
 from django.utils import timezone
 
@@ -9,13 +8,10 @@ from tcms.rpc.tests.utils import APITestCase
 from tcms.testcases.models import BugSystem
 from tcms.tests.factories import ComponentFactory, TestExecutionFactory
 
-from trackers_integration.issuetracker.mantis import Mantis, MantisAPI
+from trackers_integration.issuetracker.mantis import Mantis
 
 
 class TestMantisIntegration(APITestCase):
-    existing_bug_id = 1
-    existing_bug_url = "http://localhost/rest/api/issues/1"
-
     def _fixture_setup(self):
         super()._fixture_setup()
 
@@ -36,16 +32,41 @@ class TestMantisIntegration(APITestCase):
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Mantis for kiwitcms/test-mantis-integration",
             tracker_type="trackers_integration.issuetracker.Mantis",
-            base_url=os.getenv("MANTIS_URL", "https://bugtracker.kiwitcms.org:8443/mantisbt"),
+            base_url=os.getenv(
+                "MANTIS_URL", "https://bugtracker.kiwitcms.org:8443/mantisbt"
+            ),
             api_password=os.getenv("MANTIS_API_TOKEN"),
         )
         self.integration = Mantis(bug_system, None)
 
-        # create more data in Mantis BT
-        self.bug_system.rpc.create_project("Kiwi TCMS")
-        self.bug_system.rpc.create_project("A private one", status = "stable", is_public = False)
+        # Configure this during tests b/c container's certificate is self-signed
+        self.integration.rpc._verify_ssl = False
 
-        # TODO: need to add global & local categories
+        # create more data in Mantis BT
+        public_project = self.integration.rpc.create_project(
+            self.execution_1.run.plan.product.name
+        )
+        private_project = self.integration.rpc.create_project(
+            f"Private-Product-{self.execution_1.run.plan.product_id}",
+            status="stable",
+            is_public=False,
+        )
+        # WARNING: Need to add global & local categories !!!!
+
+        public_issue = self.integration.rpc.create_issue(
+            "Hello World", "First public bug here", "General", public_project["name"]
+        )
+        self.private_issue = self.integration.rpc.create_issue(
+            "Hello Private",
+            "Not everyone can read this",
+            "General",
+            private_project["name"],
+        )
+
+        self.existing_bug_id = public_issue["id"]
+        self.existing_bug_url = (
+            f"{bug_system.base_url}/view.php?id={self.existing_bug_id}"
+        )
 
     def test_bug_id_from_url(self):
         result = self.integration.bug_id_from_url(self.existing_bug_url)
@@ -56,6 +77,14 @@ class TestMantisIntegration(APITestCase):
 
         self.assertEqual("Hello World", result["title"])
         self.assertIn("First public bug here", result["description"])
+
+    def test_details_for_issue_in_private_project(self):
+        result = self.integration.details(
+            f"{self.integration.bug_system.base_url}/view.php?id={self.private_issue['id']}"
+        )
+
+        self.assertEqual("Hello Private", result["title"])
+        self.assertIn("Not everyone can read this", result["description"])
 
     def test_auto_update_bugtracker(self):
         initial_comments = self.integration.rpc.get_comments(self.existing_bug_id)
@@ -105,7 +134,7 @@ class TestMantisIntegration(APITestCase):
         self.assertIn("view.php?id=", result["response"])
 
         new_issue_id = self.integration.bug_id_from_url(result["response"])
-        issue = self.integration.rpc.get_issue(new_issue_id)["issues"][0]
+        issue = self.integration.rpc.get_issue(new_issue_id)
 
         self.assertEqual(
             f"Failed test: {self.execution_1.case.summary}", issue["summary"]
@@ -132,62 +161,18 @@ class TestMantisIntegration(APITestCase):
         # Close issue after test is finised.
         self.integration.rpc.close_issue(new_issue_id)
 
-    def test_report_issue_from_test_execution_empty_baseurl_exception(self):
+    def test_report_issue_from_test_execution_fallback_to_manual(self):
         # simulate user clicking the 'Report bug' button in TE widget, TR page
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Mantis for kiwitcms/test-mantis-integration Exception",
-            tracker_type="tcms.issuetracker.mantis.Mantis",
-            base_url="incorrect_url",
-            api_password=os.getenv("MANTIS_INTEGRATION_API_PASSWORD"),
+            tracker_type="trackers_integration.issuetracker.Mantis",
+            base_url="https://mantisbt.example.com",
+            api_password="an-invalid-token",
         )
         integration = Mantis(bug_system, None)
+        integration.rpc._verify_ssl = False
+
         result = self.rpc_client.Bug.report(
             self.execution_1.pk, integration.bug_system.pk
         )
         self.assertIn("bug_report_page.php", result["response"])
-
-
-class TestMantisAPI(unittest.TestCase):
-    mantis_project = "Sample_Project"
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        client_secret = os.getenv("MANTIS_INTEGRATION_API_PASSWORD")
-        base_url = "http://localhost"
-        cls.api_instance = MantisAPI(base_url, client_secret)
-
-        test_issue_data = {
-            "summary": "Sample Issue",
-            "description": "Sample Issue Description",
-            "category": {"name": "General"},
-            "project": {"name": cls.mantis_project},
-        }
-
-        result = cls.api_instance.create_issue(test_issue_data)
-        cls.issue_id = result["issue"]["id"]
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.api_instance.close_issue(cls.issue_id)
-        return super().tearDownClass()
-
-    def test_create_issue(self):
-        test_issue_data = {
-            "summary": "Sample Issue",
-            "description": "Sample Issue Description",
-            "category": {"name": "General"},
-            "project": {"name": self.mantis_project},
-        }
-
-        result = self.api_instance.create_issue(test_issue_data)
-        self.assertEqual(result["issue"]["summary"], "Sample Issue")
-
-        # Close work item after test is finished.
-        self.api_instance.close_issue(result["issue"]["id"])
-
-    def test_add_comment(self):
-        test_comment_body = {"text": "Test Comment"}
-        result = self.api_instance.add_comment(self.issue_id, test_comment_body)
-        self.assertEqual(result["note"]["text"], "Test Comment")
-        self.api_instance.delete_comment(self.issue_id, result["note"]["id"])
