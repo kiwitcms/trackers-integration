@@ -126,7 +126,7 @@ class TestMantisIntegration(APITestCase):
         )
 
         # Close issue after test is finised.
-        close_issue(self.integration.rpc, new_issue_id)
+        self.integration.rpc.close_issue(new_issue_id)
 
     def test_report_issue_from_test_execution_empty_baseurl_exception(self):
         # simulate user clicking the 'Report bug' button in TE widget, TR page
@@ -165,7 +165,7 @@ class TestMantisAPI(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        close_issue(cls.api_instance, cls.issue_id)
+        cls.api_instance.close_issue(cls.issue_id)
         return super().tearDownClass()
 
     def test_create_issue(self):
@@ -180,15 +180,10 @@ class TestMantisAPI(unittest.TestCase):
         self.assertEqual(result["issue"]["summary"], "Sample Issue")
 
         # Close work item after test is finished.
-        close_issue(self.api_instance, result["issue"]["id"])
+        self.api_instance.close_issue(result["issue"]["id"])
 
     def test_add_comment(self):
         test_comment_body = {"text": "Test Comment"}
         result = self.api_instance.add_comment(self.issue_id, test_comment_body)
         self.assertEqual(result["note"]["text"], "Test Comment")
         self.api_instance.delete_comment(self.issue_id, result["note"]["id"])
-
-
-def close_issue(instance, issue_id):
-    close_issue_body = {"status": {"name": "closed"}}
-    instance.update_issue(issue_id, close_issue_body)

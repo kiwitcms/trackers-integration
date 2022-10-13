@@ -37,6 +37,9 @@ class MantisAPI:
         url = f"{self.base_url}/issues/{issue_id}"
         return self._request("PATCH", url, headers=self.headers, json=body)
 
+    def close_issue(self, issue_id):
+        self.update_issue(issue_id, {"status": {"name": "closed"}})
+
     def get_comments(self, issue_id):
         url = f"{self.base_url}/issues/{issue_id}"
         return self._request("GET", url, headers=self.headers)["issues"][0]["notes"]
