@@ -118,14 +118,19 @@ class Mantis(IssueTrackerType):
     """
     .. versionadded:: 11.6-Enterprise
 
-    Support for Mantis. Requires:
+    Support for Mantis BT.
 
-    :base_url: URL to Mantis Server - e.g. https://mantisbt.org
-    :api_password: Mantis API token
+    .. warning::
 
-    .. note::
-        You can leave the ``api_username`` field blank since
-        those are not used by issue tracker!
+        Make sure that this package is installed inside Kiwi TCMS and that
+        ``EXTERNAL_BUG_TRACKERS`` setting contains a dotted path reference to
+        this class! When using *Kiwi TCMS Enterprise* this is configured
+        automatically.
+
+    **Authentication**:
+
+    :base_url: URL to Mantis BT installation - e.g. https://example.org/mantisbt/
+    :api_password: Mantis BT API token
     """
 
     it_class = MantisThread
@@ -136,38 +141,39 @@ class Mantis(IssueTrackerType):
     def is_adding_testcase_to_issue_disabled(self):
         return not (self.bug_system.base_url and self.bug_system.api_password)
 
-    def get_project_from_mantis(self, execution):
+    def get_project_from_mantis(self, product_name):
         """
-        Returns the project from the actual Mantis instance.
-        Will try to match execution.run.plan.product.name, otherwise will
-        return the first found!
+        Returns a project from the Mantis BT database.
+        Will try to match execution.run.plan.product.name or
+        ``MANTIS_PROJECT_NAME`` configuration setting! Otherwise will
+        return the first project found!
 
         You may override this method if you want more control and customization,
         see https://kiwitcms.org/blog/tags/customization/
         """
         projects = self.rpc.get_projects()["projects"]
-        try:
-            project = next(
-                project
-                for project in projects
-                if project["name"] == execution.run.plan.product.name
-            )
-            return project["name"]
-        except StopIteration:
-            return projects[0]["name"]
+        for project in projects:
+            if project["name"].lower() == product_name.lower():
+                return project
+
+        return projects[0]
 
     def _report_issue(self, execution, user):
         """
         Mantis creates the Issue with Title
         """
         try:
-            project_name = self.get_project_from_mantis(execution)
+            project = self.get_project_from_mantis(
+                getattr(
+                    settings, "MANTIS_PROJECT_NAME", execution.run.plan.product.name
+                )
+            )
 
             issue = self.rpc.create_issue(
                 f"Failed test: {execution.case.summary}",
                 markdown2html(self._report_comment(execution, user)),
                 "General",
-                project_name,
+                project["name"],
             )
 
             issue_url = f"{self.bug_system.base_url}/view.php?id={issue['id']}"
