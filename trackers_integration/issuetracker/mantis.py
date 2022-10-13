@@ -13,6 +13,8 @@ class MantisAPI:
     :meta private:
     """
 
+    _verify_ssl = True
+
     def __init__(self, base_url=None, api_token=None):
         self.headers = {
             "Accept": "application/json-patch+json",
@@ -25,47 +27,25 @@ class MantisAPI:
         url = f"{self.base_url}/projects"
         return self._request("GET", url, headers=self.headers)
 
-    def create_project(self, name, description = "", status = "development", is_public = True):
+    def create_project(
+        self, name, description="", status="development", is_public=True
+    ):
         url = f"{self.base_url}/projects"
 
         # these seem to be hard-coded and API docs don't show any methods
         # related to Project Status
         statuses = {
-            "development": {
-                "id": 10,
-                "name": "development",
-                "label": "development"
-            },
-            "release": {
-                "id": 30,
-                "name": "release",
-                "label": "release"
-            },
-            "stable": {
-                "id": 50,
-                "name": "stable",
-                "label": "stable"
-            },
-            "obsolete": {
-                "id": 70,
-                "name": "obsolete",
-                "label": "obsolete"
-            },
+            "development": {"id": 10, "name": "development", "label": "development"},
+            "release": {"id": 30, "name": "release", "label": "release"},
+            "stable": {"id": 50, "name": "stable", "label": "stable"},
+            "obsolete": {"id": 70, "name": "obsolete", "label": "obsolete"},
         }
 
         # these seem to be hard-coded and API docs don't show any methods
         # related to Project View State
         view_states = {
-            True: {
-                "id": 10,
-                "name": "public",
-                "label": "public"
-            },
-            False: {
-                "id": 50,
-                "name": "private",
-                "label": "private"
-            }
+            True: {"id": 10, "name": "public", "label": "public"},
+            False: {"id": 50, "name": "private", "label": "private"},
         }
 
         payload = {
@@ -75,15 +55,21 @@ class MantisAPI:
             "enabled": True,
             "view_state": view_states[is_public],
         }
-        return self._request("POST", url, headers=self.headers, json=payload)
+        return self._request("POST", url, headers=self.headers, json=payload)["project"]
 
     def get_issue(self, issue_id):
         url = f"{self.base_url}/issues/{issue_id}"
-        return self._request("GET", url, headers=self.headers)
+        return self._request("GET", url, headers=self.headers)["issues"][0]
 
-    def create_issue(self, body):
+    def create_issue(self, summary, description, category_name, project_name):
         url = f"{self.base_url}/issues/"
-        return self._request("POST", url, headers=self.headers, json=body)
+        body = {
+            "summary": summary,
+            "description": description,
+            "category": {"name": category_name},
+            "project": {"name": project_name},
+        }
+        return self._request("POST", url, headers=self.headers, json=body)["issue"]
 
     def update_issue(self, issue_id, body):
         url = f"{self.base_url}/issues/{issue_id}"
@@ -93,20 +79,25 @@ class MantisAPI:
         self.update_issue(issue_id, {"status": {"name": "closed"}})
 
     def get_comments(self, issue_id):
-        url = f"{self.base_url}/issues/{issue_id}"
-        return self._request("GET", url, headers=self.headers)["issues"][0]["notes"]
+        issue = self.get_issue(issue_id)
+        if "notes" in issue:
+            return issue["notes"]
 
-    def add_comment(self, issue_id, body):
+        return []
+
+    def add_comment(self, issue_id, text):
         url = f"{self.base_url}/issues/{issue_id}/notes"
+        body = {
+            "text": text,
+        }
         return self._request("POST", url, headers=self.headers, json=body)
 
     def delete_comment(self, issue_id, note_id):
-        headers = {"Content-type": "application/json"}
         url = f"{self.base_url}/issues/{issue_id}/notes/{note_id}"
-        return requests.request("DELETE", url, headers=headers, timeout=30)
+        return self._request("DELETE", url, headers=self.headers)
 
-    @staticmethod
-    def _request(method, url, **kwargs):
+    def _request(self, method, url, **kwargs):
+        kwargs["verify"] = self._verify_ssl
         return requests.request(method, url, timeout=30, **kwargs).json()
 
 
@@ -120,10 +111,7 @@ class MantisThread(IntegrationThread):
     """
 
     def post_comment(self):
-        comment_body = {
-            "text": markdown2html(self.text()),
-        }
-        self.rpc.add_comment(self.bug_id, comment_body)
+        self.rpc.add_comment(self.bug_id, markdown2html(self.text()))
 
 
 class Mantis(IssueTrackerType):
@@ -172,18 +160,15 @@ class Mantis(IssueTrackerType):
         """
         Mantis creates the Issue with Title
         """
-
-        create_body = {
-            "summary": f"Failed test: {execution.case.summary}",
-            "description": markdown2html(self._report_comment(execution, user)),
-            "category": {"name": "General"},
-        }
-
         try:
             project_name = self.get_project_from_mantis(execution)
-            create_body["project"] = {"name": project_name}
 
-            issue = self.rpc.create_issue(create_body)["issue"]
+            issue = self.rpc.create_issue(
+                f"Failed test: {execution.case.summary}",
+                markdown2html(self._report_comment(execution, user)),
+                "General",
+                project_name,
+            )
 
             issue_url = f"{self.bug_system.base_url}/view.php?id={issue['id']}"
             # add a link reference that will be shown in the UI
@@ -209,6 +194,6 @@ class Mantis(IssueTrackerType):
         """
         issue = self.rpc.get_issue(self.bug_id_from_url(url))
         return {
-            "title": issue["issues"][0]["summary"],
-            "description": issue["issues"][0]["description"],
+            "title": issue["summary"],
+            "description": issue["description"],
         }
