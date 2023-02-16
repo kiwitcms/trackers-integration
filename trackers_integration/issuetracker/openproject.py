@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2022-2023 Alexander Todorov <atodorov@MrSenko.com>
 #
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -75,16 +75,6 @@ class API:
         return self._request("GET", url, auth=self.auth)
 
 
-class ThreadRunner(base.IntegrationThread):
-    """
-    :meta private:
-    """
-
-    def post_comment(self):
-        comment_body = {"comment": {"raw": self.text()}}
-        self.rpc.add_comment(self.bug_id, comment_body)
-
-
 class OpenProject(base.IssueTrackerType):
     """
     .. versionadded:: 11.6-Enterprise
@@ -104,8 +94,6 @@ class OpenProject(base.IssueTrackerType):
     :base_url: URL to OpenProject instance - e.g. https://kiwitcms.openproject.com/
     :api_password: API token
     """
-
-    it_class = ThreadRunner
 
     def _rpc_connection(self):
         return API(self.bug_system.base_url, self.bug_system.api_password)
@@ -198,6 +186,10 @@ class OpenProject(base.IssueTrackerType):
         )
 
         return (new_issue, new_url)
+
+    def post_comment(self, execution, bug_id):
+        comment_body = {"comment": {"raw": self.text(execution)}}
+        self.rpc.add_comment(bug_id, comment_body)
 
     def details(self, url):
         """

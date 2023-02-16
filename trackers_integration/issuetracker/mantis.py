@@ -5,7 +5,7 @@ from django.conf import settings
 
 from tcms.core.contrib.linkreference.models import LinkReference
 from tcms.core.templatetags.extra_filters import markdown2html
-from tcms.issuetracker.base import IntegrationThread, IssueTrackerType
+from tcms.issuetracker.base import IssueTrackerType
 
 
 class MantisAPI:
@@ -103,19 +103,6 @@ class MantisAPI:
         return requests.request(method, url, timeout=30, **kwargs).json()
 
 
-class MantisThread(IntegrationThread):
-    """
-    Execute Mantis code in a thread!
-
-    Executed from the IssueTracker interface methods.
-
-    :meta private:
-    """
-
-    def post_comment(self):
-        self.rpc.add_comment(self.bug_id, markdown2html(self.text()))
-
-
 class Mantis(IssueTrackerType):
     """
     .. versionadded:: 11.6-Enterprise
@@ -134,8 +121,6 @@ class Mantis(IssueTrackerType):
     :base_url: URL to Mantis BT installation - e.g. https://example.org/mantisbt/
     :api_password: Mantis BT API token
     """
-
-    it_class = MantisThread
 
     def _rpc_connection(self):
         return MantisAPI(self.bug_system.base_url, self.bug_system.api_password)
@@ -215,6 +200,9 @@ class Mantis(IssueTrackerType):
                 url += "/"
 
             return (None, f"{url}bug_report_page.php")
+
+    def post_comment(self, execution, bug_id):
+        self.rpc.add_comment(bug_id, markdown2html(self.text(execution)))
 
     def details(self, url):
         """
