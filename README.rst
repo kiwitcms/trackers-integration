@@ -23,6 +23,11 @@ various Issue Trackers.
 Changelog
 ---------
 
+v0.4.0 (16 Feb 2023)
+~~~~~~~~~~~~~~~~~~~~
+
+- Remove IntegrationThread classes due to refactoring in Kiwi TCMS 12.1
+
 
 v0.3.0 (13 Oct 2022)
 ~~~~~~~~~~~~~~~~~~~~
