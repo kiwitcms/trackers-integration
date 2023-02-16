@@ -17,7 +17,7 @@ Extra Issue Tracker integration for Kiwi TCMS
 Introduction
 ------------
 
-This package provides Issue Tracker integration between Kiwi TCMS and
+This package provides extra integration between Kiwi TCMS and
 various Issue Trackers.
 
 Changelog
@@ -27,7 +27,8 @@ Changelog
 v0.3.0 (13 Oct 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
-- Add support for Mantis BT with contributions from @cmbahadir
+- Add support for Mantis BT with contributions from
+  `@cmbahadir <https://github.com/cmbahadir>`_
 
 
 v0.2.0 (20 Sep 2022)
