@@ -27,7 +27,7 @@ v0.5.0 (6 Jun 2023)
 ~~~~~~~~~~~~~~~~~~~
 
 - Fix typo in module name listed in settings. Closes
-  `Issue #34 <<https://github.com/kiwitcms/trackers-integration/issues/34>`_
+  `Issue #34 <https://github.com/kiwitcms/trackers-integration/issues/34>`_
   (Stefan Weiberg)
 
 
