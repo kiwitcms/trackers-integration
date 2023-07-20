@@ -78,6 +78,7 @@ class API:
         url = f"{self.base_url}/projects/{project_id}/categories"
         return self._request("GET", url, auth=self.auth)
 
+
 class OpenProject(base.IssueTrackerType):
     """
     .. versionadded:: 11.6-Enterprise
@@ -186,7 +187,9 @@ class OpenProject(base.IssueTrackerType):
             project_id, getattr(settings, "OPENPROJECT_WORKPACKAGE_TYPE_NAME", "Bug")
         )
 
-        category = self.get_workpackage_category(project_id, execution.case.category.name)
+        category = self.get_workpackage_category(
+            project_id, execution.case.category.name
+        )
 
         if category:
             new_issue = self.rpc.create_workpackage(
