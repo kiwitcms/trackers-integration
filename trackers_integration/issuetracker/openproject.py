@@ -74,6 +74,9 @@ class API:
         url = f"{self.base_url}/projects/{project_id}/types"
         return self._request("GET", url, auth=self.auth)
 
+    def get_workpackage_categories(self, project_id):
+        url = f"{self.base_url}/projects/{project_id}/categories"
+        return self._request("GET", url, auth=self.auth)
 
 class OpenProject(base.IssueTrackerType):
     """
@@ -159,6 +162,21 @@ class OpenProject(base.IssueTrackerType):
         except Exception as err:
             raise RuntimeError("WorkPackage Type not found") from err
 
+    def get_workpackage_category(self, project_id, name):
+        """
+        Return a WorkPackage category matching by name.
+        If there is no match then return None.
+        """
+        try:
+            categories = self.rpc.get_workpackage_categories(project_id)
+            for category in categories["_embedded"]["elements"]:
+                if category["name"].lower() == name.lower():
+                    return category
+
+            return None
+        except Exception as err:
+            raise RuntimeError("WorkPackage Category not found") from err
+
     def _report_issue(self, execution, user):
         project = self.get_project_by_name(execution.run.plan.product.name)
         project_id = project["id"]
@@ -168,16 +186,31 @@ class OpenProject(base.IssueTrackerType):
             project_id, getattr(settings, "OPENPROJECT_WORKPACKAGE_TYPE_NAME", "Bug")
         )
 
-        new_issue = self.rpc.create_workpackage(
-            project_id,
-            {
-                "subject": f"Failed test: {execution.case.summary}",
-                "description": {"raw": self._report_comment(execution, user)},
-                "_links": {
-                    "type": _type["_links"]["self"],
+        category = self.get_workpackage_category(project_id, execution.case.category.name)
+
+        if category:
+            new_issue = self.rpc.create_workpackage(
+                project_id,
+                {
+                    "subject": f"Failed test: {execution.case.summary}",
+                    "description": {"raw": self._report_comment(execution, user)},
+                    "_links": {
+                        "type": _type["_links"]["self"],
+                        "category": category["_links"]["self"],
+                    },
                 },
-            },
-        )
+            )
+        else:
+            new_issue = self.rpc.create_workpackage(
+                project_id,
+                {
+                    "subject": f"Failed test: {execution.case.summary}",
+                    "description": {"raw": self._report_comment(execution, user)},
+                    "_links": {
+                        "type": _type["_links"]["self"],
+                    },
+                },
+            )
 
         _id = new_issue["id"]
         new_url = f"{self.bug_system.base_url}/projects/{project_identifier}/work_packages/{_id}"
