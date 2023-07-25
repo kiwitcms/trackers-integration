@@ -234,7 +234,12 @@ class OpenProject(base.IssueTrackerType):
         issue = self.rpc.get_workpackage(self.bug_id_from_url(url))
         issue_type = issue["_embedded"]["type"]["name"].upper()
         status = issue["_embedded"]["status"]["name"].upper()
+        try:
+            assignee = issue["_embedded"]["assignee"]["name"]
+        except Exception as err:
+            assignee = "unassigned"
+
         return {
             "title": f"{status} {issue_type}: " + issue["subject"],
-            "description": issue["description"]["html"],
+            "description": "Assignee: " + assignee,
         }
