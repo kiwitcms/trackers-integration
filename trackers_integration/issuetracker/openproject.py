@@ -167,6 +167,8 @@ class OpenProject(base.IssueTrackerType):
         """
         Return a WorkPackage category matching by name.
         If there is no match then return None.
+
+        .. versionadded:: 12.6
         """
         try:
             categories = self.rpc.get_workpackage_categories(project_id)
