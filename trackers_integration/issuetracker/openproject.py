@@ -193,30 +193,17 @@ class OpenProject(base.IssueTrackerType):
             project_id, execution.case.category.name
         )
 
+        arguments = {
+            "subject": f"Failed test: {execution.case.summary}",
+            "description": {"raw": self._report_comment(execution, user)},
+            "_links": {
+                "type": _type["_links"]["self"],
+            },
+        }
         if category:
-            new_issue = self.rpc.create_workpackage(
-                project_id,
-                {
-                    "subject": f"Failed test: {execution.case.summary}",
-                    "description": {"raw": self._report_comment(execution, user)},
-                    "_links": {
-                        "type": _type["_links"]["self"],
-                        "category": category["_links"]["self"],
-                    },
-                },
-            )
-        else:
-            new_issue = self.rpc.create_workpackage(
-                project_id,
-                {
-                    "subject": f"Failed test: {execution.case.summary}",
-                    "description": {"raw": self._report_comment(execution, user)},
-                    "_links": {
-                        "type": _type["_links"]["self"],
-                    },
-                },
-            )
+            arguments["_links"]["category"] = category["_links"]["self"]
 
+        new_issue = self.rpc.create_workpackage(project_id, arguments)
         _id = new_issue["id"]
         new_url = f"{self.bug_system.base_url}/projects/{project_identifier}/work_packages/{_id}"
 
