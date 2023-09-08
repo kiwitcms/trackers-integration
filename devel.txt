@@ -6,5 +6,6 @@ flake8
 parameterized
 pylint-django
 kiwitcms-django-plugin
+psycopg2
 robotframework
 robotframework-seleniumlibrary

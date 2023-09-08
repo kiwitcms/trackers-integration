@@ -33,7 +33,11 @@ entry_point = pkg_resources.EntryPoint.parse(
 dist._ep_map = {"kiwitcms.plugins": {"trackers_integration_devel": entry_point}}
 pkg_resources.working_set.add(dist)
 
-from tcms.settings.devel import *  # noqa: E402, F403
+# only useful in CI b/c Admin pages and their tests are multi-tenant aware
+if int(os.getenv("CI_USE_MULTI_TENANT", "0")):
+    from tcms.settings.product import *  # noqa: E402, F403
+else:
+    from tcms.settings.devel import *  # noqa: E402, F403
 
 # check for a clean devel environment
 if os.path.exists(os.path.join(BASE_DIR, "kiwitcms_trackers_integration.egg-info")):

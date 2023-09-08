@@ -17,7 +17,7 @@ checkout_kiwi:
 
 .PHONY: pylint
 pylint: checkout_kiwi
-	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) pylint \
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) DJANGO_SETTINGS_MODULE="test_project.settings" pylint \
 	    --load-plugins=pylint.extensions.no_self_use \
 	    --load-plugins=pylint_django --django-settings-module=test_project.settings \
 	    --load-plugins=kiwi_lint -d similar-string \

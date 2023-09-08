@@ -59,7 +59,16 @@ jobs:
         echo "username = kiwitcms-bot" >> ~/.tcms.conf
         echo "password = ${{ secrets.TCMS_PASSWORD }}" >> ~/.tcms.conf
 
+    - name: Prepare ENV
+      id: prepare-env
+      if: matrix.tracker == 'internals'
+      run: |
+        echo "CI_USE_MULTI_TENANT=1" >> "$GITHUB_OUTPUT"
+        pip install kiwitcms-tenants
+
     - name: Execute tests
+      env:
+        CI_USE_MULTI_TENANT: ${{ steps.prepare-env.outputs.CI_USE_MULTI_TENANT || 0 }}
       run: |
         # load any extra ENV vars that came from initialize-data
         [ -f /tmp/env ] && source /tmp/env
@@ -77,7 +86,9 @@ jobs:
           export TCMS_BUILD=$(echo $GITHUB_SHA | cut -c1-7)
         fi
 
-        PYTHONPATH=.:../Kiwi coverage run --source='.' ./manage.py test -v2 --noinput trackers_integration.tests.test_${{ matrix.tracker }}
+        PYTHONPATH=.:../Kiwi EXECUTOR=standard AUTO_CREATE_SCHEMA='' KIWI_TENANTS_DOMAIN="example.com" \
+            coverage run --source='.' ./manage.py test -v2 --noinput trackers_integration.tests.test_${{ matrix.tracker }}
+
 
     - name: Send coverage to codecov.io
       uses: codecov/codecov-action@v3
