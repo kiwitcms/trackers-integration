@@ -1,10 +1,17 @@
+SHELL = /bin/bash
 KIWI_INCLUDE_PATH="../Kiwi/"
 
 .PHONY: checkout_kiwi
 checkout_kiwi:
 	if [ ! -d "$(KIWI_INCLUDE_PATH)/kiwi_lint" ]; then \
 	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
-	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/devel.txt; \
+	    pushd $(KIWI_INCLUDE_PATH); \
+	    pip install -U -r requirements/devel.txt; \
+	    pushd tcms/; \
+	    npm install --dev; \
+	    ./node_modules/.bin/webpack; \
+	    popd; \
+	    popd; \
 	fi
 
 
