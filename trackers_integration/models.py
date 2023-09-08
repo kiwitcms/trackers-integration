@@ -48,3 +48,6 @@ class ApiToken(models.Model):
     api_password = models.CharField(
         max_length=256, null=True, blank=True, verbose_name="API password or token"
     )
+
+    def __str__(self):
+        return f"{self.api_username} @ {self.base_url}"
