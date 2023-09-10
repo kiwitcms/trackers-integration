@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from tcms.kiwi_auth.tests import __FOR_TESTING__
 from tcms.tests import LoggedInTestCase
+from tcms.tests.factories import UserFactory
 from tcms.testcases.models import BugSystem
 from tcms.utils.permissions import initiate_user_with_default_setups
 
@@ -42,13 +43,29 @@ class TestApiTokenAdmin(LoggedInTestCase):
             api_password=__FOR_TESTING__,
         )
 
+        cls.alice = UserFactory(username="Alice")
+        cls.alices_token = ApiToken.objects.create(
+            owner=cls.alice,
+            base_url="http://example.com",
+            api_username="alice@redmine",
+            api_password=__FOR_TESTING__,
+        )
+
+        cls.testers_token = ApiToken.objects.create(
+            owner=cls.tester,
+            base_url="http://bugzilla.example.com",
+            api_username="tester@bugzilla.org",
+            api_password=__FOR_TESTING__,
+        )
+
     def test_adding_a_token_updates_the_owner_field_to_the_current_user(self):
+        initial_count = ApiToken.objects.filter(owner=self.tester).count()
+
         # the owner field isn't visible in the Add page
         response = self.client.get(reverse("admin:trackers_integration_apitoken_add"))
         self.assertEqual(HTTPStatus.OK, response.status_code)
         self.assertNotContains(response, "Owner")
 
-        self.assertFalse(ApiToken.objects.filter(owner=self.tester).exists())
         response = self.client.post(
             reverse("admin:trackers_integration_apitoken_add"),
             {
@@ -61,7 +78,123 @@ class TestApiTokenAdmin(LoggedInTestCase):
         self.assertContains(response, "kiwitcms-bot @ http://open-project.example.com")
         self.assertContains(response, "was added successfully")
 
-        self.assertTrue(ApiToken.objects.filter(owner=self.tester).exists())
-        token = ApiToken.objects.filter(owner=self.tester).first()
+        self.assertEqual(
+            ApiToken.objects.filter(owner=self.tester).count(), initial_count + 1
+        )
+        token = ApiToken.objects.filter(owner=self.tester).last()
         self.assertEqual(token.base_url, "http://open-project.example.com")
         self.assertEqual(token.api_username, "kiwitcms-bot")
+
+    def test_changelist_view_doesnt_show_records_from_other_users(self):
+        response = self.client.get(
+            reverse("admin:trackers_integration_apitoken_changelist")
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertNotContains(response, "alice@redmine")
+        self.assertNotContains(
+            response,
+            f"/admin/trackers_integration/apitoken/{self.alices_token.pk}/change/",
+        )
+
+    def test_changelist_view_shows_records_from_myself(self):
+        response = self.client.get(
+            reverse("admin:trackers_integration_apitoken_changelist")
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "tester@bugzilla.org")
+        self.assertContains(
+            response,
+            f"/admin/trackers_integration/apitoken/{self.testers_token.pk}/change/",
+        )
+
+    def test_change_view_doesnt_show_records_from_other_users(self):
+        response = self.client.get(
+            reverse(
+                "admin:trackers_integration_apitoken_change",
+                args=[self.alices_token.pk],
+            ),
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(
+            response, f"api token with ID “{self.alices_token.pk}” doesn’t exist"
+        )
+        self.assertContains(response, "Site administration")
+
+    def test_change_view_shows_records_from_myself(self):
+        response = self.client.get(
+            reverse(
+                "admin:trackers_integration_apitoken_change",
+                args=[self.testers_token.pk],
+            ),
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "Change api token")
+        self.assertContains(
+            response,
+            f"/admin/trackers_integration/apitoken/{self.testers_token.pk}/delete/",
+        )
+
+    def test_delete_view_doesnt_show_records_from_other_users(self):
+        response = self.client.get(
+            reverse(
+                "admin:trackers_integration_apitoken_delete",
+                args=[self.alices_token.pk],
+            ),
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(
+            response, f"api token with ID “{self.alices_token.pk}” doesn’t exist"
+        )
+        self.assertContains(response, "Site administration")
+
+        # retry with a POST request
+        response = self.client.post(
+            reverse(
+                "admin:trackers_integration_apitoken_delete",
+                args=[self.alices_token.pk],
+            ),
+            {"post": "yes"},
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(
+            response, f"api token with ID “{self.alices_token.pk}” doesn’t exist"
+        )
+        self.assertContains(response, "Site administration")
+
+    def test_delete_view_shows_records_from_myself(self):
+        self_token = ApiToken.objects.create(
+            owner=self.tester,
+            base_url="http://self.example.com",
+            api_username="self@example.com",
+            api_password=__FOR_TESTING__,
+        )
+
+        response = self.client.get(
+            reverse(
+                "admin:trackers_integration_apitoken_delete",
+                args=[self_token.pk],
+            ),
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "Are you sure")
+        self.assertContains(
+            response, f"/admin/trackers_integration/apitoken/{self_token.pk}/change/"
+        )
+
+        # retry with a POST request
+        response = self.client.post(
+            reverse(
+                "admin:trackers_integration_apitoken_delete",
+                args=[self_token.pk],
+            ),
+            {"post": "yes"},
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(
+            response, f"The api token “{self_token}” was deleted successfully."
+        )
+        self.assertContains(response, "Api tokens")
