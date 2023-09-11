@@ -85,6 +85,41 @@ class TestApiTokenAdmin(LoggedInTestCase):
         self.assertEqual(token.base_url, "http://open-project.example.com")
         self.assertEqual(token.api_username, "kiwitcms-bot")
 
+    def test_add_view_shows_dropdown_select_of_existing_bug_trackers(self):
+        response = self.client.get(reverse("admin:trackers_integration_apitoken_add"))
+        # warning: can't assert on the select tag b/c order of its attribute change
+        # but html=True expects a closed <select> tag with everything in between
+        self.assertContains(
+            response,
+            '<option value="https://mantis.example.com:8443/mantisbt">'
+            "https://mantis.example.com:8443/mantisbt</option>",
+            html=True,
+        )
+        self.assertContains(
+            response,
+            '<option value="http://open-project.example.com">'
+            "http://open-project.example.com</option>",
+            html=True,
+        )
+
+        # POSTing an invalid base_url will trigger an error
+        response = self.client.post(
+            reverse("admin:trackers_integration_apitoken_add"),
+            {
+                "base_url": "http://invalid.com",
+                "api_username": "kiwitcms-bot",
+                "api_password": __FOR_TESTING__,
+            },
+            follow=True,
+        )
+        self.assertNotContains(response, "kiwitcms-bot @ http://invalid.com")
+        self.assertNotContains(response, "was added successfully")
+        self.assertContains(response, "Please correct the error below")
+        self.assertContains(
+            response,
+            "Select a valid choice. http://invalid.com is not one of the available choices.",
+        )
+
     def test_changelist_view_doesnt_show_records_from_other_users(self):
         response = self.client.get(
             reverse("admin:trackers_integration_apitoken_changelist")
