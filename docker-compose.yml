@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+    db:
+        container_name: postgresql_database
+        image: centos/postgresql-12-centos7
+        restart: always
+        ports:
+            - 5432:5432
+        volumes:
+            - postgresql_database_data:/var/lib/pgsql/data
+        environment:
+            POSTGRESQL_DATABASE: test_project
+            POSTGRESQL_USER: kiwi
+            POSTGRESQL_PASSWORD: kiwi
+volumes:
+    postgresql_database_data:
