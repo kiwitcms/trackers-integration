@@ -4,11 +4,11 @@ from django.contrib.auth.models import Permission
 from django.urls import reverse
 
 from tcms.kiwi_auth.tests import __FOR_TESTING__
-from tcms.tests import LoggedInTestCase
 from tcms.tests.factories import UserFactory
 from tcms.testcases.models import BugSystem
 from tcms.utils.permissions import initiate_user_with_default_setups
 
+from tcms_tenants.tests import LoggedInTestCase  # pylint: disable=import-error
 from trackers_integration.models import ApiToken
 
 
@@ -24,8 +24,8 @@ def initialize_permissions(user):
 
 class TestApiTokenAdmin(LoggedInTestCase):
     @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
+    def setUpClass(cls):  # pylint: disable=invalid-name
+        super().setUpClass()
 
         initialize_permissions(cls.tester)
 
