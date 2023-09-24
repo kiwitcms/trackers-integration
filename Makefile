@@ -28,7 +28,7 @@ pylint: checkout_kiwi
 
 .PHONY: flake8
 flake8: checkout_kiwi
-	flake8 *.py tcms_settings_dir/ trackers_integration/ test_project/
+	flake8 *.py tcms_settings_dir/ trackers_integration/
 
 
 .PHONY: check
