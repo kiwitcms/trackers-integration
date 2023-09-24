@@ -27,6 +27,16 @@ if os.path.exists(os.path.join(BASE_DIR, "kiwitcms_trackers_integration.egg-info
     print("ERORR: .egg-info/ directories mess up plugin loading code in devel mode")
     sys.exit(1)
 
+DATABASES["default"].update(  # pylint: disable=objects-update-used
+    {
+        "NAME": "test_project",
+        "USER": "kiwi",
+        "PASSWORD": "kiwi",
+        "HOST": "localhost",
+        "OPTIONS": {},
+    }
+)
+
 # import the settings which automatically get distributed with this package
 openproject_settings = os.path.join(
     BASE_DIR, "tcms_settings_dir", "trackers_integration.py"
