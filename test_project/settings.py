@@ -1,11 +1,27 @@
 # pylint: disable=wildcard-import, unused-wildcard-import
-# Copyright (c) 2022 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2022-2023 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=invalid-name, protected-access, wrong-import-position
 import os
 import sys
 import pkg_resources
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+# site-packages/tcms_settings_dir/ must be before ./tcms_settings_dir/
+# so we can load multi_tenant.py first!
+home_dir = os.path.expanduser("~")
+removed_paths = []
+for path in sys.path:
+    if path.startswith(home_dir) and path.find("site-packages") == -1:
+        removed_paths.append(path)
+
+for path in removed_paths:
+    sys.path.remove(path)
+
+# re add them again
+sys.path.extend(removed_paths)
 
 # pretend this is a plugin during testing & development
 # IT NEEDS TO BE BEFORE the wildcard import below !!!
@@ -19,13 +35,14 @@ pkg_resources.working_set.add(dist)
 
 from tcms.settings.devel import *  # noqa: E402, F403
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-sys.path.insert(0, BASE_DIR)
-
 # check for a clean devel environment
 if os.path.exists(os.path.join(BASE_DIR, "kiwitcms_trackers_integration.egg-info")):
     print("ERORR: .egg-info/ directories mess up plugin loading code in devel mode")
     sys.exit(1)
+
+# these are enabled only for testing purposes
+DEBUG = TEMPLATE_DEBUG = True
+LOCALE_PATHS = [os.path.join(BASE_DIR, "trackers_integration", "locale")]
 
 DATABASES["default"].update(  # pylint: disable=objects-update-used
     {
