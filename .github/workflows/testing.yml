@@ -50,7 +50,6 @@ jobs:
 
     - name: Initialize bugs DB
       run: |
-        docker exec -i postgresql_database psql -c "CREATE EXTENSION IF NOT EXISTS btree_gin;"
         docker exec -i postgresql_database psql -c "ALTER USER kiwi CREATEDB;"
 
         ./tests/${{ matrix.tracker }}/initialize-data
