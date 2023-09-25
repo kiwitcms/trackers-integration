@@ -24,10 +24,10 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Create database
+    - name: Start database for Kiwi TCMS
       run: |
-        docker-compose pull db
-        docker-compose run -d -p 5432:5432 --name postgresql_database db
+        docker-compose pull
+        docker-compose up -d
 
     - name: Dockerize
       run: |
@@ -50,8 +50,6 @@ jobs:
 
     - name: Initialize bugs DB
       run: |
-        docker exec -i postgresql_database psql -c "ALTER USER kiwi CREATEDB;"
-
         ./tests/${{ matrix.tracker }}/initialize-data
 
     - name: Configure ~/.tcms.conf for ${{ matrix.kiwitcms-url }}
