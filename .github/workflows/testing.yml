@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         kiwitcms-url: [tcms.kiwitcms.org, public.tenant.kiwitcms.org]
-        python-version: [3.8]
+        python-version: [3.9]
         tracker: [internals, mantis, openproject]
 
     steps:
