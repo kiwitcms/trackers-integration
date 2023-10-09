@@ -1,7 +1,18 @@
 # pylint: disable=no-self-use
 
+from contextlib import ContextDecorator
 from django import forms
 from django.contrib import admin
+
+try:
+    from django_tenants.utils import tenant_context
+except ModuleNotFoundError:
+
+    class tenant_context(
+        ContextDecorator
+    ):  # pylint: disable=invalid-name,remove-empty-class,nested-class-found,too-few-public-methods
+        pass
+
 
 from tcms.testcases.models import BugSystem
 from trackers_integration.models import ApiToken
@@ -36,15 +47,20 @@ class ApiTokenAdmin(admin.ModelAdmin):
     def get_issuetracker_urls(self, request):
         """
         Return a list of drop-down choices which represent all of the
-        defined external Issue Tracker records accessible to the current user!
+        defined external Issue Tracker records accessible to the current user
+        across all tenants they are authorized for!
         """
         choices = []
 
-        for base_url in BugSystem.objects.all().values_list("base_url", flat=True):
-            # note: (<actual value>, <display value>)
-            choices.append((base_url, base_url))
+        for tenant in request.user.tenant_set.all():
+            with tenant_context(tenant):
+                for base_url in BugSystem.objects.all().values_list(
+                    "base_url", flat=True
+                ):
+                    # note: (<actual value>, <display value>)
+                    choices.append((base_url, base_url))
 
-        return choices
+        return list(set(choices))
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)

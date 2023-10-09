@@ -3,6 +3,13 @@ from http import HTTPStatus
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 
+from django_tenants.utils import (  # pylint: disable=import-error
+    get_tenant_model,
+    get_tenant_domain_model,
+    tenant_context,
+    schema_context,
+)
+
 from tcms.kiwi_auth.tests import __FOR_TESTING__
 from tcms.tests.factories import UserFactory
 from tcms.testcases.models import BugSystem
@@ -29,34 +36,57 @@ class TestApiTokenAdmin(LoggedInTestCase):
 
         initialize_permissions(cls.tester)
 
-        BugSystem.objects.create(
-            name="Mantis for kiwitcms/test-mantis-integration",
-            tracker_type="trackers_integration.issuetracker.Mantis",
-            base_url="https://mantis.example.com:8443/mantisbt",
-            api_password=__FOR_TESTING__,
-        )
+        with schema_context("public"):
+            cls.tenant2 = get_tenant_model()(schema_name="tenant2", owner=cls.tester)
+            cls.tenant2.save()
 
-        BugSystem.objects.create(
-            name="OpenProject for kiwitcms/trackers-integration",
-            tracker_type="trackers_integration.issuetracker.OpenProject",
-            base_url="http://open-project.example.com",
-            api_password=__FOR_TESTING__,
-        )
+            domain2 = get_tenant_domain_model()(
+                tenant=cls.tenant2, domain="example.com"
+            )
+            domain2.save()
 
-        cls.alice = UserFactory(username="Alice")
-        cls.alices_token = ApiToken.objects.create(
-            owner=cls.alice,
-            base_url="http://example.com",
-            api_username="alice@redmine",
-            api_password=__FOR_TESTING__,
-        )
+        with tenant_context(cls.tenant2):
+            cls.tenant2.authorized_users.add(cls.tester)
 
-        cls.testers_token = ApiToken.objects.create(
-            owner=cls.tester,
-            base_url="http://bugzilla.example.com",
-            api_username="tester@bugzilla.org",
-            api_password=__FOR_TESTING__,
-        )
+            BugSystem.objects.create(
+                name="Bugzilla Upstream",
+                tracker_type="tcms.issuetracker.types.Bugzilla",
+                base_url="https://bugzilla.org",
+                api_url="https://bugzilla.org/xml-rpc.cgi",
+                api_username="kiwitcms-bot",
+                api_password=__FOR_TESTING__,
+            )
+
+        with tenant_context(cls.tenant):
+            BugSystem.objects.create(
+                name="Mantis for kiwitcms/test-mantis-integration",
+                tracker_type="trackers_integration.issuetracker.Mantis",
+                base_url="https://mantis.example.com:8443/mantisbt",
+                api_password=__FOR_TESTING__,
+            )
+
+            BugSystem.objects.create(
+                name="OpenProject for kiwitcms/trackers-integration",
+                tracker_type="trackers_integration.issuetracker.OpenProject",
+                base_url="http://open-project.example.com",
+                api_password=__FOR_TESTING__,
+            )
+
+        with schema_context("public"):
+            cls.alice = UserFactory(username="Alice")
+            cls.alices_token = ApiToken.objects.create(
+                owner=cls.alice,
+                base_url="http://example.com",
+                api_username="alice@redmine",
+                api_password=__FOR_TESTING__,
+            )
+
+            cls.testers_token = ApiToken.objects.create(
+                owner=cls.tester,
+                base_url="http://bugzilla.example.com",
+                api_username="tester@bugzilla.org",
+                api_password=__FOR_TESTING__,
+            )
 
     def test_adding_a_token_updates_the_owner_field_to_the_current_user(self):
         initial_count = ApiToken.objects.filter(owner=self.tester).count()
@@ -99,6 +129,13 @@ class TestApiTokenAdmin(LoggedInTestCase):
             response,
             '<option value="http://open-project.example.com">'
             "http://open-project.example.com</option>",
+            html=True,
+        )
+
+        # this is from tenant2
+        self.assertContains(
+            response,
+            '<option value="https://bugzilla.org">https://bugzilla.org</option>',
             html=True,
         )
 
