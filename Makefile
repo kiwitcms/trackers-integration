@@ -33,3 +33,9 @@ flake8: checkout_kiwi
 
 .PHONY: check
 check: flake8 pylint
+
+.PHONY: messages
+messages: checkout_kiwi
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) CI_USE_MULTI_TENANT=1 KIWI_TENANTS_DOMAIN='test.com' \
+	    ./manage.py makemessages --locale en --no-obsolete --no-vinaigrette --ignore "test*.py"
+	ls trackers_integration/locale/*/LC_MESSAGES/*.po | xargs -n 1 -I @ msgattrib -o @ --no-fuzzy @
