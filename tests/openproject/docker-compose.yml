@@ -4,7 +4,7 @@ services:
     # build our own modified image to make it easier for testing
     bugtracker_kiwitcms_org:
         container_name: bugtracker_kiwitcms_org
-        image: openproject/community:12
+        image: openproject/community:13
         restart: always
         ports:
             - 80:80
