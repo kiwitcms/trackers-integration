@@ -85,6 +85,9 @@ class TestOpenProjectIntegration(APITestCase):
 
         last_comment = comments["_embedded"]["elements"][-1]
 
+        # comment made by 'admin' user
+        self.assertEqual(last_comment["_links"]["user"]["href"], "/api/v3/users/4")
+
         # assert that a comment has been added as the last one
         # and also verify its text
         for expected_string in [
@@ -107,6 +110,8 @@ class TestOpenProjectIntegration(APITestCase):
         new_issue_id = self.integration.bug_id_from_url(result["response"])
         issue = self.integration.rpc.get_workpackage(new_issue_id)
 
+        # new issue opened by 'admin' user
+        self.assertEqual(issue["_links"]["author"]["href"], "/api/v3/users/4")
         self.assertEqual(
             f"Failed test: {self.execution_1.case.summary}",
             issue["subject"],
