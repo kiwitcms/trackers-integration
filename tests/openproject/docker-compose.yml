@@ -13,4 +13,4 @@ services:
             OPENPROJECT_HOST__NAME: bugtracker.kiwitcms.org
             OPENPROJECT_HTTPS: "false"
         volumes:
-          - ./seeds.rb:/app/db/seeds.rb
+          - ./seeds.rb:/app/db/seeds.rb:z
