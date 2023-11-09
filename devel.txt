@@ -4,7 +4,7 @@ black
 coverage
 flake8
 parameterized
-pylint-django==2.5.3
+pylint-django==2.5.5
 kiwitcms-django-plugin
 psycopg2
 robotframework
