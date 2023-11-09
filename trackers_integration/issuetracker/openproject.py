@@ -47,7 +47,11 @@ class API:
 
     @staticmethod
     def _request(method, url, **kwargs):
-        return requests.request(method, url, timeout=30, **kwargs).json()
+        result = requests.request(method, url, timeout=30, **kwargs).json()
+        if result.get("_type", "not-an-error").lower() == "error":
+            raise RuntimeError(result.get("message", "API error"))
+
+        return result
 
     def get_projects(self, name=None):
         url = f"{self.base_url}/projects"
