@@ -233,5 +233,5 @@ class OpenProject(base.IssueTrackerType):
         status = issue["_embedded"]["status"]["name"].upper()
         return {
             "title": f"{status} {issue_type}: " + issue["subject"],
-            "description": issue["description"]["html"],
+            "description": issue["description"]["raw"],
         }
