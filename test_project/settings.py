@@ -48,7 +48,9 @@ if os.path.exists(os.path.join(BASE_DIR, "kiwitcms_trackers_integration.egg-info
 DEBUG = TEMPLATE_DEBUG = True
 LOCALE_PATHS = [os.path.join(BASE_DIR, "trackers_integration", "locale")]
 
-DATABASES["default"].update(  # pylint: disable=objects-update-used
+DATABASES[  # pylint: disable=objects-update-used, used-before-assignment
+    "default"
+].update(
     {
         "NAME": "test_project",
         "USER": "kiwi",
@@ -69,6 +71,7 @@ exec(  # pylint: disable=exec-used
     globals(),
 )
 
+# pylint: disable=used-before-assignment
 if "test_app" not in INSTALLED_APPS:  # noqa: F405
     INSTALLED_APPS.append("test_project.test_app")  # noqa: F405
 
