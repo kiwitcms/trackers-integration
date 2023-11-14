@@ -202,16 +202,6 @@ class TestOpenProjectAndIndividualApiTokens(APITestCase):
         fake_request.user = self.api_user
         self.integration = OpenProject(bug_system, fake_request)
 
-        self.clear_cache()
-
-    def tearDown(self):
-        self.clear_cache()
-
-    def clear_cache(self):
-        # may contain references to an RPC object with different credentials
-        # from one of the other test classes so always clear the cache
-        self.integration.rpc_cache.clear()
-
     def test_auto_update_bugtracker(self):
         last_comment = None
         initial_comments = self.integration.rpc.get_comments(self.existing_bug_id)
