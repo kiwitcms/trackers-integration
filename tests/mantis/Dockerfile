@@ -1,6 +1,6 @@
 FROM registry.access.redhat.com/ubi9/php-80
 
-ADD mantisbt-2.25.5.zip .
+ADD mantisbt-2.26.0.zip .
 RUN unzip mantisbt-*.zip && mv mantisbt-*/ mantisbt/
 
 # Note: we still need to perform the install procedure b/c
