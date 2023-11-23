@@ -24,7 +24,7 @@ Changelog
 ---------
 
 v0.6.0 (23 Nov 2023)
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 - Automatically set category when opening a new issue in OpenProject
   if the category matches ``execution.case.category.name`` (Stefan Weinberg)
