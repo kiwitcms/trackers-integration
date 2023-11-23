@@ -8,14 +8,16 @@ from tcms.core.templatetags.extra_filters import markdown2html
 from tcms.issuetracker.base import IssueTrackerType
 
 
+# this only needs to be changed during testing
+_VERIFY_SSL = True
+
+
 class MantisAPI:
     """
     Mantis Rest API interaction class.
 
     :meta private:
     """
-
-    _verify_ssl = True
 
     def __init__(self, base_url=None, api_token=None):
         self.headers = {
@@ -98,8 +100,9 @@ class MantisAPI:
         url = f"{self.base_url}/issues/{issue_id}/notes/{note_id}"
         return self._request("DELETE", url, headers=self.headers)
 
-    def _request(self, method, url, **kwargs):
-        kwargs["verify"] = self._verify_ssl
+    @staticmethod
+    def _request(method, url, **kwargs):
+        kwargs["verify"] = _VERIFY_SSL
         return requests.request(method, url, timeout=30, **kwargs).json()
 
 
