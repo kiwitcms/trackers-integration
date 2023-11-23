@@ -25,7 +25,7 @@ def get_install_requires(path):
 
 setup(
     name="kiwitcms-trackers-integration",
-    version="0.5.0",
+    version="0.6.0",
     description="Integration between Kiwi TCMS and various Issue Trackers",
     long_description=get_long_description(),
     author="Kiwi TCMS",

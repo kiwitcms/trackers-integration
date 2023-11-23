@@ -23,6 +23,22 @@ various Issue Trackers.
 Changelog
 ---------
 
+v0.6.0 (23 Nov 2023)
+~~~~~~~~~~~~~~~~~~~
+
+- Automatically set category when opening a new issue in OpenProject
+  if the category matches ``execution.case.category.name`` (Stefan Weinberg)
+- Use raw text instead of HTML for OpenProject bug details popover. Closes
+  `Issue #38 <https://github.com/kiwitcms/trackers-integration/issues/38>`_
+- Add a new ``ApiToken`` model to the database. It can be used to provide
+  personal API tokens for bug-tracker integrations
+- Make use of the new ``IssueTracker.rpc_credentials`` property
+  introduced in Kiwi TCMS v12.6
+- Start testing with Python 3.9
+- Start testing against OpenProject v13
+- Start testing against MantisBT 2.26.0
+
+
 v0.5.0 (6 Jun 2023)
 ~~~~~~~~~~~~~~~~~~~
 
