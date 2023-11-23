@@ -8,6 +8,7 @@ from tcms.rpc.tests.utils import APITestCase
 from tcms.testcases.models import BugSystem
 from tcms.tests.factories import ComponentFactory, TestExecutionFactory
 
+from trackers_integration.issuetracker import mantis
 from trackers_integration.issuetracker.mantis import Mantis
 
 
@@ -39,8 +40,8 @@ class TestMantisIntegration(APITestCase):
         )
         self.integration = Mantis(bug_system, None)
 
-        # Configure this during tests b/c container's certificate is self-signed
-        self.integration.rpc._verify_ssl = False
+        # WARNING: container's certificate is self-signed
+        mantis._VERIFY_SSL = False
 
         # create more data in Mantis BT
         public_project = self.integration.rpc.create_project(
@@ -170,7 +171,6 @@ class TestMantisIntegration(APITestCase):
             api_password="an-invalid-token",
         )
         integration = Mantis(bug_system, None)
-        integration.rpc._verify_ssl = False
 
         result = self.rpc_client.Bug.report(
             self.execution_1.pk, integration.bug_system.pk
