@@ -26,7 +26,7 @@ class TestMantisIntegration(APITestCase):
         self.execution_1.run.save()
 
         self.component = ComponentFactory(
-            name="Mantis integration", product=self.execution_1.run.plan.product
+            name="Mantis integration", product=self.execution_1.build.version.product
         )
         self.execution_1.case.add_component(self.component)
 
@@ -143,7 +143,7 @@ class TestMantisIntegration(APITestCase):
         for expected_string in [
             f"Filed from execution {self.execution_1.get_full_url()}",
             "Reporter",
-            self.execution_1.run.plan.product.name,
+            self.execution_1.build.version.product.name,
             self.component.name,
             "Steps to reproduce",
             self.execution_1.case.text,

@@ -138,7 +138,7 @@ class Mantis(IssueTrackerType):
     def get_project_from_mantis(self, product_name):
         """
         Returns a Project from the Mantis BT database.
-        Will try to match execution.run.plan.product.name or
+        Will try to match execution.build.version.product.name or
         ``MANTIS_PROJECT_NAME`` configuration setting! Otherwise will
         return the first project found!
 
@@ -175,7 +175,9 @@ class Mantis(IssueTrackerType):
         try:
             project = self.get_project_from_mantis(
                 getattr(
-                    settings, "MANTIS_PROJECT_NAME", execution.run.plan.product.name
+                    settings,
+                    "MANTIS_PROJECT_NAME",
+                    execution.build.version.product.name,
                 )
             )
             category = self.get_category_from_mantis(
