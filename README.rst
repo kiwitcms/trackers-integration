@@ -23,6 +23,18 @@ various Issue Trackers.
 Changelog
 ---------
 
+v0.7.0 (14 Jan 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- 1-click bug report will now use ``execution.build.version.product`` instead
+  of ``execution.run.plan.product`` following changes in Kiwi TCMS, see:
+  <https://github.com/kiwitcms/Kiwi/commit/48a33a71e664c8c3ed2ceb298b5f1e19d0bddb52>_
+  and `PR #3439 <https://github.com/kiwitcms/Kiwi/pull/3439>`_ for more details
+- Fix typo in markdown
+- Build & test with Python 3.11
+- Test with psycopg3
+
+
 v0.6.0 (23 Nov 2023)
 ~~~~~~~~~~~~~~~~~~~~
 
