@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2022-2024 Alexander Todorov <atodorov@MrSenko.com>
 #
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -185,7 +185,7 @@ class OpenProject(base.IssueTrackerType):
             raise RuntimeError("WorkPackage Category not found") from err
 
     def _report_issue(self, execution, user):
-        project = self.get_project_by_name(execution.run.plan.product.name)
+        project = self.get_project_by_name(execution.build.version.product.name)
         project_id = project["id"]
         project_identifier = project["identifier"]
 

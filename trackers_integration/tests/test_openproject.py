@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2022-2024 Alexander Todorov <atodorov@MrSenko.com>
 #
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 #
@@ -37,7 +37,8 @@ class TestOpenProjectIntegration(APITestCase):
         self.execution_1.run.save()
 
         self.component = ComponentFactory(
-            name="OpenProject integration", product=self.execution_1.run.plan.product
+            name="OpenProject integration",
+            product=self.execution_1.build.version.product,
         )
         self.execution_1.case.add_component(self.component)
 
@@ -120,7 +121,7 @@ class TestOpenProjectIntegration(APITestCase):
         for expected_string in [
             f"Filed from execution {self.execution_1.get_full_url()}",
             "Reporter",
-            self.execution_1.run.plan.product.name,
+            self.execution_1.build.version.product.name,
             self.component.name,
             "Steps to reproduce",
             self.execution_1.case.text,
@@ -177,11 +178,12 @@ class TestOpenProjectAndIndividualApiTokens(APITestCase):
         self.execution_1.run.save()
 
         # 'kiwitcms-bot' user is authorized only for this project
-        self.execution_1.run.plan.product.name = "Demo project"
-        self.execution_1.run.plan.product.save()
+        self.execution_1.build.version.product.name = "Demo project"
+        self.execution_1.build.version.product.save()
 
         self.component = ComponentFactory(
-            name="OpenProject integration", product=self.execution_1.run.plan.product
+            name="OpenProject integration",
+            product=self.execution_1.build.version.product,
         )
         self.execution_1.case.add_component(self.component)
 
@@ -263,7 +265,7 @@ class TestOpenProjectAndIndividualApiTokens(APITestCase):
         for expected_string in [
             f"Filed from execution {self.execution_1.get_full_url()}",
             "Reporter",
-            self.execution_1.run.plan.product.name,
+            self.execution_1.build.version.product.name,
             self.component.name,
             "Steps to reproduce",
             self.execution_1.case.text,
