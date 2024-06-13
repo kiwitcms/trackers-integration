@@ -23,6 +23,15 @@ various Issue Trackers.
 Changelog
 ---------
 
+v1.0.0 (13 Jun 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Relicense this package under GNU Affero General Public License v3 or later
+- Prior versions are still licensed under GNU General Public License v3
+- Remove the ability to set category when opening a new issue in OpenProject
+  b/c of missing relicense permission
+
+
 v0.7.0 (14 Jan 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
