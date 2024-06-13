@@ -1,3 +1,9 @@
+# Copyright (c) 2022-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022 @cmbahadir <c.mete.bahadir@gmail.com>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
+
 # pylint: disable=attribute-defined-outside-init, protected-access
 import os
 

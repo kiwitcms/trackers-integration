@@ -1,3 +1,8 @@
+# Copyright (c) 2022-2023 Alexander Todorov <atodorov@otb.bg>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
+
 FROM registry.access.redhat.com/ubi9/php-80
 
 ADD mantisbt-2.26.0.zip .

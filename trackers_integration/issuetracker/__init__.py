@@ -1,8 +1,11 @@
+# Copyright (c) 2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022 @cmbahadir <c.mete.bahadir@gmail.com>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
+
 # pylint: disable=unused-import
 
-# Copyright (c) 2022 Alexander Todorov <atodorov@MrSenko.com>
-#
-# Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 """
     Extra Issue Tracker integration between Kiwi TCMS and various
     Issue Trackers.
