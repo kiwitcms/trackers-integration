@@ -78,10 +78,6 @@ class API:
         url = f"{self.base_url}/projects/{project_id}/types"
         return self._request("GET", url, auth=self.auth)
 
-    def get_workpackage_categories(self, project_id):
-        url = f"{self.base_url}/projects/{project_id}/categories"
-        return self._request("GET", url, auth=self.auth)
-
 
 class OpenProject(base.IssueTrackerType):
     """
@@ -167,23 +163,6 @@ class OpenProject(base.IssueTrackerType):
         except Exception as err:
             raise RuntimeError("WorkPackage Type not found") from err
 
-    def get_workpackage_category(self, project_id, name):
-        """
-        Return a WorkPackage category matching by name.
-        If there is no match then return None.
-
-        .. versionadded:: 12.6
-        """
-        try:
-            categories = self.rpc.get_workpackage_categories(project_id)
-            for category in categories["_embedded"]["elements"]:
-                if category["name"].lower() == name.lower():
-                    return category
-
-            return None
-        except Exception as err:
-            raise RuntimeError("WorkPackage Category not found") from err
-
     def _report_issue(self, execution, user):
         project = self.get_project_by_name(execution.build.version.product.name)
         project_id = project["id"]
@@ -193,10 +172,6 @@ class OpenProject(base.IssueTrackerType):
             project_id, getattr(settings, "OPENPROJECT_WORKPACKAGE_TYPE_NAME", "Bug")
         )
 
-        category = self.get_workpackage_category(
-            project_id, execution.case.category.name
-        )
-
         arguments = {
             "subject": f"Failed test: {execution.case.summary}",
             "description": {"raw": self._report_comment(execution, user)},
@@ -204,8 +179,6 @@ class OpenProject(base.IssueTrackerType):
                 "type": _type["_links"]["self"],
             },
         }
-        if category:
-            arguments["_links"]["category"] = category["_links"]["self"]
 
         new_issue = self.rpc.create_workpackage(project_id, arguments)
         _id = new_issue["id"]
