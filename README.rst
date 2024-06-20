@@ -1,3 +1,5 @@
+Ignore: Retest with Django 5
+
 Extra Issue Tracker integration for Kiwi TCMS
 =============================================
 
