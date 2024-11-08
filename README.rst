@@ -23,6 +23,14 @@ various Issue Trackers.
 Changelog
 ---------
 
+v1.1.0 (08 Nov 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Bug details integration code now returns the additional fields
+  `id`, `status` and `url` alongside the existing ones
+  `description` and `title`!
+
+
 v1.0.0 (13 Jun 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
