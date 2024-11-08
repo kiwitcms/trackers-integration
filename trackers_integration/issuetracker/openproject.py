@@ -202,10 +202,14 @@ class OpenProject(base.IssueTrackerType):
         """
         Fetches WorkPackage details from OpenProject to be displayed in tooltips.
         """
-        issue = self.rpc.get_workpackage(self.bug_id_from_url(url))
+        issue_id = self.bug_id_from_url(url)
+        issue = self.rpc.get_workpackage(issue_id)
         issue_type = issue["_embedded"]["type"]["name"].upper()
         status = issue["_embedded"]["status"]["name"].upper()
         return {
-            "title": f"{status} {issue_type}: " + issue["subject"],
+            "id": issue_id,
             "description": issue["description"]["raw"],
+            "status": status,
+            "title": f"{issue_type}: " + issue["subject"],
+            "url": url,
         }

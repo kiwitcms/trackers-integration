@@ -58,8 +58,11 @@ class TestOpenProjectIntegration(APITestCase):
     def test_details(self):
         result = self.integration.details(self.existing_bug_url)
 
-        self.assertEqual("NEW TASK: Setup conference website", result["title"])
+        self.assertEqual(self.existing_bug_id, result["id"])
         self.assertEqual("", result["description"])
+        self.assertEqual("NEW", result["status"])
+        self.assertEqual("TASK: Setup conference website", result["title"])
+        self.assertEqual(self.existing_bug_url, result["url"])
 
     def test_auto_update_bugtracker(self):
         last_comment = None
