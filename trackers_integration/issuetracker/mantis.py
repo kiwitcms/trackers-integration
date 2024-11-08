@@ -224,6 +224,9 @@ class Mantis(IssueTrackerType):
         """
         issue = self.rpc.get_issue(self.bug_id_from_url(url))
         return {
-            "title": issue["summary"],
+            "id": issue["id"],
             "description": issue["description"],
+            "status": issue["status"]["name"],
+            "title": issue["summary"],
+            "url": url,
         }

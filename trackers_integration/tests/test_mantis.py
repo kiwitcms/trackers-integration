@@ -82,16 +82,21 @@ class TestMantisIntegration(APITestCase):
     def test_details(self):
         result = self.integration.details(self.existing_bug_url)
 
-        self.assertEqual("Hello World", result["title"])
+        self.assertEqual(self.existing_bug_id, result["id"])
         self.assertIn("First public bug here", result["description"])
+        self.assertEqual("new", result["status"])
+        self.assertEqual("Hello World", result["title"])
+        self.assertEqual(self.existing_bug_url, result["url"])
 
     def test_details_for_issue_in_private_project(self):
-        result = self.integration.details(
-            f"{self.integration.bug_system.base_url}/view.php?id={self.private_issue['id']}"
-        )
+        target_url = f"{self.integration.bug_system.base_url}/view.php?id={self.private_issue['id']}"
+        result = self.integration.details(target_url)
 
-        self.assertEqual("Hello Private", result["title"])
+        self.assertEqual(self.private_issue["id"], result["id"])
         self.assertIn("Not everyone can read this", result["description"])
+        self.assertEqual("new", result["status"])
+        self.assertEqual("Hello Private", result["title"])
+        self.assertEqual(target_url, result["url"])
 
     def test_auto_update_bugtracker(self):
         initial_comments = self.integration.rpc.get_comments(self.existing_bug_id)
