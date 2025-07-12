@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ ! -d "/opt/trac/projects/kiwitcms" ]; then
+  trac-admin /opt/trac/projects/kiwitcms initenv kiwitcms postgres://trac:trac@db:5432/tracbt?schema=kiwitcms
+  trac-admin /opt/trac/projects/kiwitcms permission add tracadmin TRAC_ADMIN
+  trac-admin /opt/trac/projects/kiwitcms permission add tester TICKET_ADMIN
+  trac-admin /opt/trac/projects/kiwitcms deploy static
+  cp /opt/trac/trac.ini /opt/trac/projects/kiwitcms/conf/
+  cp /opt/trac/kiwitcms-logo.png /opt/trac/projects/kiwitcms/htdocs/
+fi
+
+echo "Running Trac daemon"
+tracd -p 80 --http11 --basic-auth="kiwitcms,/opt/trac/.htpwd,Trac" /opt/trac/projects/kiwitcms
