@@ -109,18 +109,7 @@ class Trac(IssueTrackerType):
                 url=issue_url,
                 is_defect=True,
             )
-            # add comments, if any
-            for comment in execution.comments.all():
-                params = {
-                    'text': self.text(comment.comment),
-                    'id': issue_id,
-                    'project': product,
-                }
-                try:
-                    self.rpc.invoke_method('ticket.comment', params)
-                except Exception:
-                    pass
-            return result, issue_url
+            return Trac._filtered_trac_ticket_data(issue, issue_url), issue_url
         except Exception as _e:  # pylint: disable=broad-except
             # something above didn't work so return a link for manually
             # entering issue details with info pre-filled
@@ -133,7 +122,7 @@ class Trac(IssueTrackerType):
                 'id': bug_id,
                 'project': execution.build.version.product.name,
             }
-            result = self.rpc.invoke_method('ticket.comment', params)
+            result = self.rpc.invoke_method('ticket.add_comment', params)
             comment = result.get('result')
             if comment is None:
                 raise RuntimeError(result.get('error'))
@@ -157,15 +146,24 @@ class Trac(IssueTrackerType):
             details = result.get('result')
             if details is None:
                 raise RuntimeError(result.get('error'))
-            return {
-                'id': details['id'],
-                'summary': details['summary'],
-                'description': details['description'],
-                'status': details['status'],
-                'url': url,
-            }
+            return Trac._filtered_trac_ticket_data(details, url)
         except Exception as _e:  # pylint: disable=broad-except
             return {'error': str(_e)}
+
+    @classmethod
+    def _filtered_trac_ticket_data(cls, ticket_data: dict, url: str) -> dict:
+        """
+        :param ticket_data: Trac ticket data as returned from Trac server
+        :param url: Trac ticket URL
+        :return: essential Trac ticket data
+        """
+        return {
+            'id': ticket_data.get('id'),
+            'title': ticket_data.get('summary'),
+            'description': ticket_data.get('description'),
+            'status': ticket_data.get('status'),
+            'url': url,
+        }
 
     @classmethod
     def _bug_info_from_url(cls, url: str) -> tuple[str, str]:
