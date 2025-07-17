@@ -3,7 +3,7 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-FROM python:3.13
+FROM python:3.11
 
 RUN pip install psycopg2-binary passlib trac trac_ticketrpc
 RUN mkdir /opt/trac /opt/trac/eggcache /opt/trac/projects
