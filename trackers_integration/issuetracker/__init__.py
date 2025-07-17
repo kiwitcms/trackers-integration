@@ -14,3 +14,4 @@
 """
 from .openproject import OpenProject  # noqa
 from .mantis import Mantis  # noqa
+from .trac import Trac  # noqa
