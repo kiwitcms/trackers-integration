@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -d "/opt/trac/projects/kiwitcms" ]; then
-  trac-admin /opt/trac/projects/kiwitcms initenv kiwitcms postgres://trac:trac@db:5432/tracbt?schema=kiwitcms
+  trac-admin /opt/trac/projects/kiwitcms initenv kiwitcms postgres://trac:trac@db:5433/tracbt?schema=kiwitcms
   trac-admin /opt/trac/projects/kiwitcms permission add tracadmin TRAC_ADMIN
   trac-admin /opt/trac/projects/kiwitcms permission add tester TICKET_ADMIN
   trac-admin /opt/trac/projects/kiwitcms deploy static
