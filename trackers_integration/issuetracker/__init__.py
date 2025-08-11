@@ -7,10 +7,10 @@
 # pylint: disable=unused-import
 
 """
-    Extra Issue Tracker integration between Kiwi TCMS and various
-    Issue Trackers.
+Extra Issue Tracker integration between Kiwi TCMS and various
+Issue Trackers.
 
-    .. versionadded:: 11.6-Enterprise
+.. versionadded:: 11.6-Enterprise
 """
 from .openproject import OpenProject  # noqa
 from .mantis import Mantis  # noqa
