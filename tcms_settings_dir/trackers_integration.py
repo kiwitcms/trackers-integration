@@ -9,6 +9,7 @@
 for module_name in (
     "trackers_integration.issuetracker.OpenProject",
     "trackers_integration.issuetracker.Mantis",
+    "trackers_integration.issuetracker.Trac",
 ):
     if module_name not in EXTERNAL_BUG_TRACKERS:  # noqa: F821
         EXTERNAL_BUG_TRACKERS.append(module_name)  # noqa: F821
