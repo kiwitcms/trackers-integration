@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2025 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -25,23 +25,24 @@ class TestOpenProjectIntegration(APITestCase):
         "http://bugtracker.kiwitcms.org/projects/demo-project/work_packages/8/activity"
     )
 
-    def _fixture_setup(self):
+    @classmethod
+    def _fixture_setup(cls):
         super()._fixture_setup()
 
-        self.execution_1 = TestExecutionFactory()
-        self.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
-        self.execution_1.case.text = "Given-When-Then"
-        self.execution_1.case.save()  # will generate history object
-        self.execution_1.run.summary = (
+        cls.execution_1 = TestExecutionFactory()
+        cls.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
+        cls.execution_1.case.text = "Given-When-Then"
+        cls.execution_1.case.save()  # will generate history object
+        cls.execution_1.run.summary = (
             "Automated TR for OpenProject integration on " + timezone.now().isoformat()
         )
-        self.execution_1.run.save()
+        cls.execution_1.run.save()
 
-        self.component = ComponentFactory(
+        cls.component = ComponentFactory(
             name="OpenProject integration",
-            product=self.execution_1.build.version.product,
+            product=cls.execution_1.build.version.product,
         )
-        self.execution_1.case.add_component(self.component)
+        cls.execution_1.case.add_component(cls.component)
 
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="OpenProject for kiwitcms/trackers-integration",
@@ -49,7 +50,7 @@ class TestOpenProjectIntegration(APITestCase):
             base_url="http://bugtracker.kiwitcms.org",
             api_password="26210315639327b10b56b7ef5d2f47f843c0ced3bafd1540fd4ecb30a06fa80f",
         )
-        self.integration = OpenProject(bug_system, None)
+        cls.integration = OpenProject(bug_system, None)
 
     def test_bug_id_from_url(self):
         result = self.integration.bug_id_from_url(self.existing_bug_url)
@@ -166,30 +167,31 @@ class TestOpenProjectAndIndividualApiTokens(APITestCase):
         "http://bugtracker.kiwitcms.org/projects/demo-project/work_packages/6/activity"
     )
 
-    def _fixture_setup(self):
+    @classmethod
+    def _fixture_setup(cls):
         super()._fixture_setup()
 
-        self.execution_1 = TestExecutionFactory()
+        cls.execution_1 = TestExecutionFactory()
 
-        self.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
-        self.execution_1.case.text = "Given-When-Then"
-        self.execution_1.case.save()  # will generate history object
+        cls.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
+        cls.execution_1.case.text = "Given-When-Then"
+        cls.execution_1.case.save()  # will generate history object
 
-        self.execution_1.run.summary = (
+        cls.execution_1.run.summary = (
             "Automated TR for OpenProject and individual API token "
             + timezone.now().isoformat()
         )
-        self.execution_1.run.save()
+        cls.execution_1.run.save()
 
         # 'kiwitcms-bot' user is authorized only for this project
-        self.execution_1.build.version.product.name = "Demo project"
-        self.execution_1.build.version.product.save()
+        cls.execution_1.build.version.product.name = "Demo project"
+        cls.execution_1.build.version.product.save()
 
-        self.component = ComponentFactory(
+        cls.component = ComponentFactory(
             name="OpenProject integration",
-            product=self.execution_1.build.version.product,
+            product=cls.execution_1.build.version.product,
         )
-        self.execution_1.case.add_component(self.component)
+        cls.execution_1.case.add_component(cls.component)
 
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="OpenProject for kiwitcms/trackers-integration",
@@ -200,13 +202,13 @@ class TestOpenProjectAndIndividualApiTokens(APITestCase):
 
         # API token for 'kiwitcms-bot' user defined in seeds.rb
         ApiToken.objects.create(
-            owner=self.api_user,
+            owner=cls.api_user,
             base_url=bug_system.base_url,
             api_password="c48c60020d8f61e612241889eff79e610410f1322811d8c20df25a71f3619e25",
         )
         fake_request = FakeRequest()
-        fake_request.user = self.api_user
-        self.integration = OpenProject(bug_system, fake_request)
+        fake_request.user = cls.api_user
+        cls.integration = OpenProject(bug_system, fake_request)
 
     def test_auto_update_bugtracker(self):
         last_comment = None
