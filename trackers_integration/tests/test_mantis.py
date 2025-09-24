@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2025 Alexander Todorov <atodorov@otb.bg>
 # Copyright (c) 2022 @cmbahadir <c.mete.bahadir@gmail.com>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
@@ -19,22 +19,23 @@ from trackers_integration.issuetracker.mantis import Mantis
 
 
 class TestMantisIntegration(APITestCase):
-    def _fixture_setup(self):
+    @classmethod
+    def _fixture_setup(cls):
         super()._fixture_setup()
 
-        self.execution_1 = TestExecutionFactory()
-        self.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
-        self.execution_1.case.text = "Given-When-Then"
-        self.execution_1.case.save()  # will generate history object
-        self.execution_1.run.summary = (
+        cls.execution_1 = TestExecutionFactory()
+        cls.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
+        cls.execution_1.case.text = "Given-When-Then"
+        cls.execution_1.case.save()  # will generate history object
+        cls.execution_1.run.summary = (
             "Automated TR for Mantis integration on " + timezone.now().isoformat()
         )
-        self.execution_1.run.save()
+        cls.execution_1.run.save()
 
-        self.component = ComponentFactory(
-            name="Mantis integration", product=self.execution_1.build.version.product
+        cls.component = ComponentFactory(
+            name="Mantis integration", product=cls.execution_1.build.version.product
         )
-        self.execution_1.case.add_component(self.component)
+        cls.execution_1.case.add_component(cls.component)
 
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Mantis for kiwitcms/test-mantis-integration",
@@ -44,35 +45,35 @@ class TestMantisIntegration(APITestCase):
             ),
             api_password=os.getenv("MANTIS_API_TOKEN"),
         )
-        self.integration = Mantis(bug_system, None)
+        cls.integration = Mantis(bug_system, None)
 
         # WARNING: container's certificate is self-signed
         mantis._VERIFY_SSL = False
 
         # create more data in Mantis BT
-        public_project = self.integration.rpc.create_project(
-            self.execution_1.run.plan.product.name
+        public_project = cls.integration.rpc.create_project(
+            cls.execution_1.run.plan.product.name
         )
-        private_project = self.integration.rpc.create_project(
-            f"Private-Product-{self.execution_1.run.plan.product_id}",
+        private_project = cls.integration.rpc.create_project(
+            f"Private-Product-{cls.execution_1.run.plan.product_id}",
             status="stable",
             is_public=False,
         )
         # WARNING: Need to add global & local categories !!!!
 
-        public_issue = self.integration.rpc.create_issue(
+        public_issue = cls.integration.rpc.create_issue(
             "Hello World", "First public bug here", "General", public_project["name"]
         )
-        self.private_issue = self.integration.rpc.create_issue(
+        cls.private_issue = cls.integration.rpc.create_issue(
             "Hello Private",
             "Not everyone can read this",
             "General",
             private_project["name"],
         )
 
-        self.existing_bug_id = public_issue["id"]
-        self.existing_bug_url = (
-            f"{bug_system.base_url}/view.php?id={self.existing_bug_id}"
+        cls.existing_bug_id = public_issue["id"]
+        cls.existing_bug_url = (
+            f"{bug_system.base_url}/view.php?id={cls.existing_bug_id}"
         )
 
     def test_bug_id_from_url(self):
