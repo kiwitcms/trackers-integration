@@ -43,9 +43,7 @@ class TestTracIntegration(APITestCase):
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Trac for kiwitcms/test-trac-integration",
             tracker_type="trackers_integration.issuetracker.Trac",
-            base_url=os.getenv(
-                "TRAC_URL", "http://bugtracker.kiwitcms.org:8080"
-            ),
+            base_url=os.getenv("TRAC_URL", "http://bugtracker.kiwitcms.org:8080"),
             api_username=os.getenv("TRAC_USERNAME", "tester"),
             api_password=os.getenv("TRAC_PASSWORD", "tester"),
         )
@@ -54,13 +52,14 @@ class TestTracIntegration(APITestCase):
         # WARNING: container's certificate is self-signed
         trac._VERIFY_SSL = False
 
-        issue_params = {"type": "defect",
-                        "priority": "major",
-                        "summary": "Smoke test failed",
-                        "description": "Something went wrong",
-                        "project": self.project_name,
-                        "component": self.project_name,
-                       }
+        issue_params = {
+            "type": "defect",
+            "priority": "major",
+            "summary": "Smoke test failed",
+            "description": "Something went wrong",
+            "project": self.project_name,
+            "component": self.project_name,
+        }
         issue = self.integration.rpc.invoke_method("ticket.create", issue_params)
 
         self.existing_bug_id = issue["id"]
@@ -161,9 +160,7 @@ class TestTracIntegration(APITestCase):
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Trac for kiwitcms/test-trac-integration",
             tracker_type="trackers_integration.issuetracker.Trac",
-            base_url=os.getenv(
-                "TRAC_URL", "http://bugtracker.kiwitcms.org:8080"
-            ),
+            base_url=os.getenv("TRAC_URL", "http://bugtracker.kiwitcms.org:8080"),
             api_username=os.getenv("TRAC_USERNAME", "tester"),
             api_password=os.getenv("TRAC_PASSWORD", "tester"),
         )
