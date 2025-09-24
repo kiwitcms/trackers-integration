@@ -1,0 +1,17 @@
+services:
+
+    # build our own modified image to make it easier for testing
+    bugtracker_kiwitcms_org:
+        container_name: bugtracker_kiwitcms_org
+        build:
+            context: .
+            dockerfile: Dockerfile
+        environment:
+            # Trac product name, must match Kiwi TCMS product name
+            TRAC_PRODUCT: "$TRAC_PRODUCT"
+            # Trac users "<username>:<password>:<permissions>;..."
+            TRAC_USERS: "tracadmin:tracadmin:TRAC_ADMIN;tester:tester:TICKET_ADMIN"
+        image: mytrac
+        restart: always
+        ports:
+            - "8080:80"
