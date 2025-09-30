@@ -22,7 +22,7 @@ class TracAPI:
     """
 
     def __init__(
-        self, base_url: str = None, api_username: str = None, api_password: str = None
+        self, base_url: str, api_username: str, api_password: str
     ):
         """
         Constructor.
@@ -74,7 +74,7 @@ class TracAPI:
 
 class Trac(IssueTrackerType):
     """
-    .. versionadded:: 14.5-Enterprise
+    .. versionadded:: 15.1-Enterprise
 
     Support for `Trac <https://trac.edgewall.org/>`_ - open source
     issue tracking system, version 1.6 and above.

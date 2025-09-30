@@ -24,7 +24,7 @@ class TestTracIntegration(APITestCase):
     def _fixture_setup(cls):
         super()._fixture_setup()
 
-        cls.project_name = os.getenv("TRAC_PRODUCT", "MyProject")
+        cls.project_name = os.getenv("GITHUB_REPOSITORY")
         cls.execution_1 = TestExecutionFactory()
         cls.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
         cls.execution_1.case.text = "Given-When-Then"
@@ -42,9 +42,9 @@ class TestTracIntegration(APITestCase):
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Trac for kiwitcms/test-trac-integration",
             tracker_type="trackers_integration.issuetracker.Trac",
-            base_url=os.getenv("TRAC_URL", "http://bugtracker.kiwitcms.org:8080"),
-            api_username=os.getenv("TRAC_USERNAME", "tester"),
-            api_password=os.getenv("TRAC_PASSWORD", "tester"),
+            base_url="http://bugtracker.kiwitcms.org:8080",
+            api_username="tester",
+            api_password="tester",
         )
         cls.integration = Trac(bug_system, None)
 
@@ -172,9 +172,9 @@ class TestTracIntegration(APITestCase):
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Trac for kiwitcms/test-trac-integration",
             tracker_type="trackers_integration.issuetracker.Trac",
-            base_url=os.getenv("TRAC_URL", "http://bugtracker.kiwitcms.org:8080"),
-            api_username=os.getenv("TRAC_USERNAME", "tester"),
-            api_password=os.getenv("TRAC_PASSWORD", "tester"),
+            base_url="http://bugtracker.kiwitcms.org:8080",
+            api_username="tester",
+            api_password="tester",
         )
         integration = Trac(bug_system, None)
 

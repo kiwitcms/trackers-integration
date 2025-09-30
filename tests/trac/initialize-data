@@ -4,16 +4,3 @@
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
-
-set -ex
-
-BASE_DIR=$(dirname $0)
-
-IP_ADDR=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' bugtracker_kiwitcms_org)
-
-TRAC_URL="http://${IP_ADDR}:8080"
-
-echo "export TRAC_URL=${TRAC_URL}" > /tmp/env
-echo "export TRAC_PRODUCT=MyProduct" >> /tmp/env
-echo "export TRAC_USERNAME=tester" >> /tmp/env
-echo "export TRAC_PASSWORD=tester" >> /tmp/env
