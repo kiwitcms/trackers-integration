@@ -103,7 +103,9 @@ class TestTracIntegration(APITestCase):
         current_comments_length = initial_comments_length
         retries = 0
         while current_comments_length != initial_comments_length + 1 and retries < 10:
-            result = self.integration.rpc.invoke_method("ticket.comments", comments_params)
+            result = self.integration.rpc.invoke_method(
+                "ticket.comments", comments_params
+            )
             comments = result["comments"]
             current_comments_length = len(comments)
             retries += 1
@@ -157,8 +159,12 @@ class TestTracIntegration(APITestCase):
         )
 
         # Close issue after test is finished.
-        close_params = {"id": new_issue_id, "project": self.project_name,
-                        "resolution": "fixed", "text": "Test case succeeded"}
+        close_params = {
+            "id": new_issue_id,
+            "project": self.project_name,
+            "resolution": "fixed",
+            "text": "Test case succeeded",
+        }
         self.integration.rpc.invoke_method("ticket.close", close_params)
 
     def test_report_issue_from_test_execution_fallback_to_manual(self):
