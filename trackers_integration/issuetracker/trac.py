@@ -21,9 +21,7 @@ class TracAPI:
     Trac server must have plugin trac-ticketrpc installed (https://pypi.org/project/trac-ticketrpc)
     """
 
-    def __init__(
-        self, base_url: str, api_username: str, api_password: str
-    ):
+    def __init__(self, base_url: str, api_username: str, api_password: str):
         """
         Constructor.
         :param base_url: base URL to Trac server from Kiwi settings
