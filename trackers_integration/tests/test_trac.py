@@ -19,26 +19,25 @@ from trackers_integration.issuetracker.trac import Trac
 
 
 class TestTracIntegration(APITestCase):
-    def __init__(self):
-        super().__init__()
-        self.project_name = os.getenv("TRAC_PRODUCT", "MyProject")
 
-    def _fixture_setup(self):
+    @classmethod
+    def _fixture_setup(cls):
         super()._fixture_setup()
 
-        self.execution_1 = TestExecutionFactory()
-        self.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
-        self.execution_1.case.text = "Given-When-Then"
-        self.execution_1.case.save()  # will generate history object
-        self.execution_1.run.summary = (
+        cls.project_name = os.getenv("TRAC_PRODUCT", "MyProject")
+        cls.execution_1 = TestExecutionFactory()
+        cls.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
+        cls.execution_1.case.text = "Given-When-Then"
+        cls.execution_1.case.save()  # will generate history object
+        cls.execution_1.run.summary = (
             "Automated TR for Trac integration on " + timezone.now().isoformat()
         )
-        self.execution_1.run.save()
+        cls.execution_1.run.save()
 
-        self.component = ComponentFactory(
-            name="Trac integration", product=self.execution_1.build.version.product
+        cls.component = ComponentFactory(
+            name="Trac integration", product=cls.execution_1.build.version.product
         )
-        self.execution_1.case.add_component(self.component)
+        cls.execution_1.case.add_component(cls.component)
 
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Trac for kiwitcms/test-trac-integration",
@@ -47,24 +46,24 @@ class TestTracIntegration(APITestCase):
             api_username=os.getenv("TRAC_USERNAME", "tester"),
             api_password=os.getenv("TRAC_PASSWORD", "tester"),
         )
-        self.integration = Trac(bug_system, None)
+        cls.integration = Trac(bug_system, None)
 
         # WARNING: container's certificate is self-signed
         trac._VERIFY_SSL = False
 
-        issue_params = {
+        create_params = {
             "type": "defect",
             "priority": "major",
             "summary": "Smoke test failed",
             "description": "Something went wrong",
-            "project": self.project_name,
-            "component": self.project_name,
+            "project": cls.project_name,
+            "component": cls.project_name,
         }
-        issue = self.integration.rpc.invoke_method("ticket.create", issue_params)
+        issue = cls.integration.rpc.invoke_method("ticket.create", create_params)
 
-        self.existing_bug_id = issue["id"]
-        self.existing_bug_url = (
-            f"{bug_system.base_url}/{self.project_name}/ticket/{self.existing_bug_id}"
+        cls.existing_bug_id = issue["id"]
+        cls.existing_bug_url = (
+            f"{bug_system.base_url}/{cls.project_name}/ticket/{cls.existing_bug_id}"
         )
 
     def test_bug_id_from_url(self):
@@ -81,7 +80,9 @@ class TestTracIntegration(APITestCase):
         self.assertEqual(self.existing_bug_url, result["url"])
 
     def test_auto_update_bugtracker(self):
-        initial_comments = self.integration.rpc.get_comments(self.existing_bug_id)
+        comments_params = {"id": self.existing_bug_id, "project": self.project_name}
+        result = self.integration.rpc.invoke_method("ticket.comments", comments_params)
+        initial_comments = result["comments"]
 
         # simulate user adding a new bug URL to a TE and clicking
         # 'Automatically update bug tracker'
@@ -100,9 +101,13 @@ class TestTracIntegration(APITestCase):
         # wait until comments have been refreshed b/c this seems to happen async
         initial_comments_length = len(initial_comments)
         current_comments_length = initial_comments_length
-        while current_comments_length != initial_comments_length + 1:
-            comments = self.integration.rpc.get_comments(self.existing_bug_id)
+        retries = 0
+        while current_comments_length != initial_comments_length + 1 and retries < 10:
+            result = self.integration.rpc.invoke_method("ticket.comments", comments_params)
+            comments = result["comments"]
             current_comments_length = len(comments)
+            retries += 1
+        self.assertLess(retries, 10)
 
         last_comment = comments[-1]
 
@@ -116,8 +121,6 @@ class TestTracIntegration(APITestCase):
         ]:
             self.assertIn(expected_string, last_comment["text"])
 
-        self.integration.rpc.delete_comment(self.existing_bug_id, last_comment["id"])
-
     def test_report_issue_from_test_execution_1click_works(self):
         # simulate user clicking the 'Report bug' button in TE widget, TR page
         result = self.rpc_client.Bug.report(
@@ -128,7 +131,8 @@ class TestTracIntegration(APITestCase):
         self.assertIn("ticket/", result["response"])
 
         new_issue_id = self.integration.bug_id_from_url(result["response"])
-        issue = self.integration.rpc.get_issue(new_issue_id)
+        details_params = {"id": new_issue_id, "project": self.project_name}
+        issue = self.integration.rpc.invoke_method("ticket.details", details_params)
 
         self.assertEqual(
             f"Failed test: {self.execution_1.case.summary}", issue["summary"]
@@ -152,8 +156,10 @@ class TestTracIntegration(APITestCase):
             ).exists()
         )
 
-        # Close issue after test is finised.
-        self.integration.rpc.close_issue(new_issue_id)
+        # Close issue after test is finished.
+        close_params = {"id": new_issue_id, "project": self.project_name,
+                        "resolution": "fixed", "text": "Test case succeeded"}
+        self.integration.rpc.invoke_method("ticket.close", close_params)
 
     def test_report_issue_from_test_execution_fallback_to_manual(self):
         # simulate user clicking the 'Report bug' button in TE widget, TR page
