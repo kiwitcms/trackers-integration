@@ -8,7 +8,7 @@ services:
             dockerfile: Dockerfile
         environment:
             # Trac product name, must match Kiwi TCMS product name
-            TRAC_PRODUCT: "$GITHUB_REPOSITORY"
+            TRAC_PRODUCT: "Demo project"
             # Trac users "<username>:<password>:<permissions>;..."
             TRAC_USERS: "tracadmin:tracadmin:TRAC_ADMIN;tester:tester:TICKET_ADMIN"
         image: mytrac

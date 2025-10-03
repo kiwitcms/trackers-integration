@@ -5,7 +5,6 @@
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 # pylint: disable=attribute-defined-outside-init, protected-access
-import os
 
 from django.utils import timezone
 
@@ -24,7 +23,7 @@ class TestTracIntegration(APITestCase):
     def _fixture_setup(cls):
         super()._fixture_setup()
 
-        cls.project_name = os.getenv("GITHUB_REPOSITORY")
+        cls.project_name = "Demo project"
         cls.execution_1 = TestExecutionFactory()
         cls.execution_1.case.summary = "Tested at " + timezone.now().isoformat()
         cls.execution_1.case.text = "Given-When-Then"
@@ -33,6 +32,10 @@ class TestTracIntegration(APITestCase):
             "Automated TR for Trac integration on " + timezone.now().isoformat()
         )
         cls.execution_1.run.save()
+
+        # 'kiwitcms-bot' user is authorized only for this project
+        cls.execution_1.build.version.product.name = cls.project_name
+        cls.execution_1.build.version.product.save()
 
         cls.component = ComponentFactory(
             name="Trac integration", product=cls.execution_1.build.version.product
