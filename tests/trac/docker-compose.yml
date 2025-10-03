@@ -12,6 +12,7 @@ services:
             # Trac users "<username>:<password>:<permissions>;..."
             TRAC_USERS: "tracadmin:tracadmin:TRAC_ADMIN;tester:tester:TICKET_ADMIN"
         image: mytrac
+        hostname: 'bugtracker.kiwitcms.org'
         restart: always
         ports:
             - "8080:80"
