@@ -14,5 +14,3 @@ services:
         image: mytrac
         hostname: 'bugtracker.kiwitcms.org'
         restart: always
-        ports:
-            - "8080:80"

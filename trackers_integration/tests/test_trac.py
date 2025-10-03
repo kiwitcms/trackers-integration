@@ -45,7 +45,7 @@ class TestTracIntegration(APITestCase):
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Trac for kiwitcms/test-trac-integration",
             tracker_type="trackers_integration.issuetracker.Trac",
-            base_url="http://bugtracker.kiwitcms.org:8080",
+            base_url="http://bugtracker.kiwitcms.org",
             api_username="tester",
             api_password="tester",
         )
@@ -175,7 +175,7 @@ class TestTracIntegration(APITestCase):
         bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Trac for kiwitcms/test-trac-integration",
             tracker_type="trackers_integration.issuetracker.Trac",
-            base_url="http://bugtracker.kiwitcms.org:8080",
+            base_url="http://bugtracker.kiwitcms.org",
             api_username="tester",
             api_password="tester",
         )
