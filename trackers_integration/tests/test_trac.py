@@ -42,14 +42,14 @@ class TestTracIntegration(APITestCase):
         )
         cls.execution_1.case.add_component(cls.component)
 
-        bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
+        cls.bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
             name="Trac for kiwitcms/test-trac-integration",
             tracker_type="trackers_integration.issuetracker.Trac",
             base_url="http://bugtracker.kiwitcms.org",
             api_username="tester",
             api_password="tester",
         )
-        cls.integration = Trac(bug_system, None)
+        cls.integration = Trac(cls.bug_system, None)
 
         # WARNING: container's certificate is self-signed
         trac._VERIFY_SSL = False
@@ -62,11 +62,11 @@ class TestTracIntegration(APITestCase):
             "project": cls.project_name,
             "component": cls.project_name,
         }
-        issue = cls.integration.rpc.invoke_method("ticket.create", create_params)
+        issue = cls.invoke_trac_rpc("ticket.create", create_params)
 
         cls.existing_bug_id = issue["id"]
         cls.existing_bug_url = (
-            f"{bug_system.base_url}/{cls.project_name}/ticket/{cls.existing_bug_id}"
+            f"{cls.bug_system.base_url}/{cls.project_name}/ticket/{cls.existing_bug_id}"
         )
 
     def test_bug_id_from_url(self):
@@ -84,7 +84,7 @@ class TestTracIntegration(APITestCase):
 
     def test_auto_update_bugtracker(self):
         comments_params = {"id": self.existing_bug_id, "project": self.project_name}
-        result = self.integration.rpc.invoke_method("ticket.comments", comments_params)
+        result = TestTracIntegration.invoke_trac_rpc("ticket.comments", comments_params)
         initial_comments = result["comments"]
 
         # simulate user adding a new bug URL to a TE and clicking
@@ -106,7 +106,7 @@ class TestTracIntegration(APITestCase):
         current_comments_length = initial_comments_length
         retries = 0
         while current_comments_length != initial_comments_length + 1 and retries < 10:
-            result = self.integration.rpc.invoke_method(
+            result = TestTracIntegration.invoke_trac_rpc(
                 "ticket.comments", comments_params
             )
             comments = result["comments"]
@@ -137,7 +137,7 @@ class TestTracIntegration(APITestCase):
 
         new_issue_id = self.integration.bug_id_from_url(result["response"])
         details_params = {"id": new_issue_id, "project": self.project_name}
-        issue = self.integration.rpc.invoke_method("ticket.details", details_params)
+        issue = TestTracIntegration.invoke_trac_rpc("ticket.details", details_params)
 
         self.assertEqual(
             f"Failed test: {self.execution_1.case.summary}", issue["summary"]
@@ -168,20 +168,27 @@ class TestTracIntegration(APITestCase):
             "resolution": "fixed",
             "text": "Test case succeeded",
         }
-        self.integration.rpc.invoke_method("ticket.close", close_params)
+        TestTracIntegration.invoke_trac_rpc("ticket.close", close_params)
 
     def test_report_issue_from_test_execution_fallback_to_manual(self):
         # simulate user clicking the 'Report bug' button in TE widget, TR page
-        bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
-            name="Trac for kiwitcms/test-trac-integration",
-            tracker_type="trackers_integration.issuetracker.Trac",
-            base_url="http://bugtracker.kiwitcms.org",
-            api_username="tester",
-            api_password="tester",
-        )
-        integration = Trac(bug_system, None)
-
         result = self.rpc_client.Bug.report(
-            self.execution_1.pk, integration.bug_system.pk
+            self.execution_1.pk, self.integration.bug_system.pk
         )
         self.assertIn("ticket/", result["response"])
+
+    @classmethod
+    def invoke_trac_rpc(cls, rpc_method: str, params: dict) -> dict:
+        """
+        Invokes JSON-RPC method on Trac server.
+        :param rpc_method: JSON-RPC method.
+        :param params: method parameters
+        :return: method result.
+        :raises: RuntimeError if method call fails.
+        """
+        _resp = cls.integration.rpc.invoke_method(rpc_method, params)
+        _error_info = _resp.get("error")
+        if _error_info is not None:
+            msg = f"RPC call {rpc_method} failed: {_error_info}"
+            raise RuntimeError(msg)
+        return _resp.get("result")
