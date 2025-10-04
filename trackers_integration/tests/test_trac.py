@@ -42,12 +42,14 @@ class TestTracIntegration(APITestCase):
         )
         cls.execution_1.case.add_component(cls.component)
 
-        cls.bug_system = BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
-            name="Trac for kiwitcms/test-trac-integration",
-            tracker_type="trackers_integration.issuetracker.Trac",
-            base_url="http://bugtracker.kiwitcms.org",
-            api_username="tester",
-            api_password="tester",
+        cls.bug_system = (
+            BugSystem.objects.create(  # nosec:B106:hardcoded_password_funcarg
+                name="Trac for kiwitcms/test-trac-integration",
+                tracker_type="trackers_integration.issuetracker.Trac",
+                base_url="http://bugtracker.kiwitcms.org",
+                api_username="tester",
+                api_password="tester",
+            )
         )
         cls.integration = Trac(cls.bug_system, None)
 
