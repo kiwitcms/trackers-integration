@@ -1,0 +1,3 @@
+passlib
+trac == 1.6
+trac_ticketrpc == 0.9.3

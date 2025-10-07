@@ -4,4 +4,6 @@
 dist/
 build/
 .coverage
+.idea
+.venv
 apps_dir/
