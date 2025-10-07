@@ -42,15 +42,19 @@ class TracAPI:
         :param method: JSON-RPC method to call
         :param args: arguments for JSON-RPC method
         :return: response from Trac server
+        :raises: RuntimeError if method call fails
         """
         project = args.get("project")
+        # make sure ticket ID has type str, if present
+        if "id" in args:
+            args["id"] = str(args["id"])
         session = Session()
         # visit Trac project's login URL first to get session cookie, otherwise JSON-RPC plugin
         # in Trac cannot determine permissions
         url = f"{self.__base_url}/{project}/login"
         resp = session.get(url, timeout=30, auth=self.__auth)
         if resp.status_code != http.HTTPStatus.OK:
-            return {"error": f"{resp.status_code}: {resp.reason}"}
+            raise RuntimeError(f"{resp.status_code}: {resp.reason}")
         # now invoke RPC method on Trac server
         url = f"{self.__base_url}/{project}/ticketrpc"
         req = {
@@ -63,11 +67,9 @@ class TracAPI:
             url, timeout=30, headers=self.__headers, auth=self.__auth, json=req
         )
         rc = resp.status_code
-        return (
-            resp.json()
-            if rc == http.HTTPStatus.OK
-            else {"error": f"{rc}: {resp.reason}"}
-        )
+        if rc == http.HTTPStatus.OK:
+            return resp.json().get("result")
+        raise RuntimeError(f"{rc}: {resp.reason}")
 
 
 class Trac(IssueTrackerType):
@@ -124,10 +126,7 @@ class Trac(IssueTrackerType):
                 "version": version,
                 "component": product,
             }
-            result = self.rpc.invoke_method("ticket.create", ticket)
-            issue = result.get("result")
-            if issue is None:
-                raise RuntimeError(result.get("error"))
+            issue = self.rpc.invoke_method("ticket.create", ticket)
             issue_id = issue.get("id")
             issue_url = f"{self.bug_system.base_url}/{product}/ticket/{issue_id}"
             # add a link reference that will be shown in the UI
@@ -143,19 +142,12 @@ class Trac(IssueTrackerType):
             return None, f"{self.bug_system.base_url}/{product}/newticket"
 
     def post_comment(self, execution, bug_id):
-        try:
-            params = {
-                "text": self.text(execution),
-                "id": bug_id,
-                "project": execution.build.version.product.name,
-            }
-            result = self.rpc.invoke_method("ticket.add_comment", params)
-            comment = result.get("result")
-            if comment is None:
-                raise RuntimeError(result.get("error"))
-            return comment
-        except Exception as _e:  # pylint: disable=broad-except
-            return {"error": str(_e)}
+        params = {
+            "text": self.text(execution),
+            "id": bug_id,
+            "project": execution.build.version.product.name,
+        }
+        return self.rpc.invoke_method("ticket.add_comment", params)
 
     def details(self, url: str) -> dict:
         """
@@ -163,16 +155,10 @@ class Trac(IssueTrackerType):
         :param url: Trac ticket URL, e.g. https://trac.myserver.local/myproject/ticket/123
         :return: issue details
         """
-        try:
-            ticket_id, project = Trac._bug_info_from_url(url)
-            params = {"id": ticket_id, "project": project}
-            result = self.rpc.invoke_method("ticket.details", params)
-            details = result.get("result")
-            if details is None:
-                raise RuntimeError(result.get("error"))
-            return Trac._filtered_trac_ticket_data(details, url)
-        except Exception as _e:  # pylint: disable=broad-except
-            return {"error": str(_e)}
+        ticket_id, project = Trac._bug_info_from_url(url)
+        params = {"id": ticket_id, "project": project}
+        details = self.rpc.invoke_method("ticket.details", params)
+        return Trac._filtered_trac_ticket_data(details, url)
 
     @classmethod
     def _filtered_trac_ticket_data(cls, ticket_data: dict, url: str) -> dict:
@@ -194,7 +180,7 @@ class Trac(IssueTrackerType):
         """
         Extracts project and ticket id from Trac URL.
         :param url: Trac ticket URL, e.g. https://trac.myserver.local/myproject/ticket/123
-        :return: project (e.g. myproject) and ticket id (e.g. 123)
+        :return: ticket id (e.g. 123), project (e.g. myproject)
         """
         url_parts = url.rstrip("/").split("/")
         if len(url_parts) < 3:
