@@ -103,20 +103,18 @@ class Trac(IssueTrackerType):
         user, password = self.rpc_credentials
         return not (self.bug_system.base_url and user and password)
 
-    def _report_issue(self, execution, _user):
+    def _report_issue(self, execution, user):
         """
         Create Trac ticket.
         :param execution: test execution data
-        :param _user: current TCMS user
+        :param user: current TCMS user
         :return: Response from Trac server, issue ID
         """
         product = execution.build.version.product.name
         try:
             version = execution.build.version.value
             summary = f"Failed test: {execution.case.summary}"
-            description = execution.case.get_text_with_version(
-                execution.case_text_version
-            )
+            description = self._report_comment(execution, user)
             ticket = {
                 "type": "defect",
                 "priority": "major",

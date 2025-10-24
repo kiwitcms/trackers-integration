@@ -6,6 +6,7 @@
 
 # pylint: disable=attribute-defined-outside-init, protected-access
 
+from urllib.parse import quote
 from django.utils import timezone
 
 from tcms.core.contrib.linkreference.models import LinkReference
@@ -13,7 +14,6 @@ from tcms.rpc.tests.utils import APITestCase
 from tcms.testcases.models import BugSystem
 from tcms.tests.factories import ComponentFactory, TestExecutionFactory
 
-from trackers_integration.issuetracker import trac
 from trackers_integration.issuetracker.trac import Trac
 
 
@@ -53,9 +53,6 @@ class TestTracIntegration(APITestCase):
         )
         cls.integration = Trac(cls.bug_system, None)
 
-        # WARNING: container's certificate is self-signed
-        trac._VERIFY_SSL = False
-
         create_params = {
             "type": "defect",
             "priority": "major",
@@ -68,12 +65,12 @@ class TestTracIntegration(APITestCase):
 
         cls.existing_bug_id = issue["id"]
         cls.existing_bug_url = (
-            f"{cls.bug_system.base_url}/{cls.project_name}/ticket/{cls.existing_bug_id}"
+            f"{cls.bug_system.base_url}/{quote(cls.project_name)}/ticket/{cls.existing_bug_id}"
         )
 
     def test_bug_id_from_url(self):
         result = self.integration.bug_id_from_url(self.existing_bug_url)
-        self.assertEqual(self.existing_bug_id, result)
+        self.assertEqual(self.existing_bug_id, str(result))
 
     def test_details(self):
         result = self.integration.details(self.existing_bug_url)
@@ -81,7 +78,7 @@ class TestTracIntegration(APITestCase):
         self.assertEqual(self.existing_bug_id, result["id"])
         self.assertIn("Something went wrong", result["description"])
         self.assertEqual("new", result["status"])
-        self.assertEqual("Smoke test failed", result["summary"])
+        self.assertEqual("Smoke test failed", result["title"])
         self.assertEqual(self.existing_bug_url, result["url"])
 
     def test_auto_update_bugtracker(self):
@@ -126,7 +123,7 @@ class TestTracIntegration(APITestCase):
             self.execution_1.run.get_full_url(),
             f"TE-{self.execution_1.pk}: {self.execution_1.case.summary}",
         ]:
-            self.assertIn(expected_string, last_comment["text"])
+            self.assertIn(expected_string, last_comment)
 
     def test_report_issue_from_test_execution_1click_works(self):
         # simulate user clicking the 'Report bug' button in TE widget, TR page
