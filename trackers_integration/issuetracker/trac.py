@@ -58,7 +58,9 @@ class TracAPI:
         # visit Trac project's login URL first to get session cookie, otherwise JSON-RPC plugin
         # in Trac cannot determine permissions
         url = f"{self.__base_url}/{project}/login"
-        resp = session.get(url, timeout=30, headers=self.__login_headers, auth=self.__auth)
+        resp = session.get(
+            url, timeout=30, headers=self.__login_headers, auth=self.__auth
+        )
         if resp.status_code != http.HTTPStatus.OK:
             raise RuntimeError(f"{resp.status_code}: {resp.reason}")
         # now invoke RPC method on Trac server
