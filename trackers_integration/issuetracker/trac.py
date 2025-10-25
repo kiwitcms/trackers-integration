@@ -6,6 +6,7 @@
 
 import http
 import time
+from urllib.parse import urlsplit
 from requests import Session
 from requests.auth import HTTPBasicAuth
 
@@ -29,9 +30,14 @@ class TracAPI:
         :param api_password: password for Trac login
         """
         self.__base_url = base_url
+        _target = urlsplit(base_url).netloc
         self.__headers = {
             "Accept": "application/json",
             "Content-type": "application/json",
+            "Host": _target,
+        }
+        self.__login_headers = {
+            "Host": _target,
         }
         self.__auth = HTTPBasicAuth(api_username, api_password)
 
@@ -52,7 +58,7 @@ class TracAPI:
         # visit Trac project's login URL first to get session cookie, otherwise JSON-RPC plugin
         # in Trac cannot determine permissions
         url = f"{self.__base_url}/{project}/login"
-        resp = session.get(url, timeout=30, auth=self.__auth)
+        resp = session.get(url, timeout=30, headers=self.__login_headers, auth=self.__auth)
         if resp.status_code != http.HTTPStatus.OK:
             raise RuntimeError(f"{resp.status_code}: {resp.reason}")
         # now invoke RPC method on Trac server
@@ -68,13 +74,16 @@ class TracAPI:
         )
         rc = resp.status_code
         if rc == http.HTTPStatus.OK:
-            return resp.json().get("result")
+            result = resp.json().get("result")
+            if "id" in result:
+                result["id"] = int(result["id"])
+            return result
         raise RuntimeError(f"{rc}: {resp.reason}")
 
 
 class Trac(IssueTrackerType):
     """
-    .. versionadded:: 15.1-Enterprise
+    .. versionadded:: 15.2-Enterprise
 
     Support for `Trac <https://trac.edgewall.org/>`_ - open source
     issue tracking system, version 1.6 and above.
@@ -174,7 +183,7 @@ class Trac(IssueTrackerType):
         }
 
     @classmethod
-    def _bug_info_from_url(cls, url: str) -> tuple[str, str]:
+    def _bug_info_from_url(cls, url: str) -> tuple[int, str]:
         """
         Extracts project and ticket id from Trac URL.
         :param url: Trac ticket URL, e.g. https://trac.myserver.local/myproject/ticket/123
@@ -183,4 +192,4 @@ class Trac(IssueTrackerType):
         url_parts = url.rstrip("/").split("/")
         if len(url_parts) < 3:
             raise RuntimeError(f"Invalid Trac ticket URL: {url}")
-        return url_parts[-1], url_parts[-3]
+        return int(url_parts[-1]), url_parts[-3]

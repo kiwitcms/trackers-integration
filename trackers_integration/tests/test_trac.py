@@ -64,11 +64,12 @@ class TestTracIntegration(APITestCase):
         issue = cls.integration.rpc.invoke_method("ticket.create", create_params)
 
         cls.existing_bug_id = issue["id"]
-        cls.existing_bug_url = f"{cls.bug_system.base_url}/{quote(cls.project_name)}/ticket/{cls.existing_bug_id}"
+        cls.existing_bug_url = (f"{cls.bug_system.base_url}/{quote(cls.project_name)}"
+                                f"/ticket/{cls.existing_bug_id}")
 
     def test_bug_id_from_url(self):
         result = self.integration.bug_id_from_url(self.existing_bug_url)
-        self.assertEqual(self.existing_bug_id, str(result))
+        self.assertEqual(self.existing_bug_id, result)
 
     def test_details(self):
         result = self.integration.details(self.existing_bug_url)
