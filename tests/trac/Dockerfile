@@ -3,7 +3,7 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 RUN mkdir -p /opt/trac/eggcache /opt/trac/products
 COPY requirements.txt .
