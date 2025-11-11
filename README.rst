@@ -23,12 +23,13 @@ various Issue Trackers.
 Changelog
 ---------
 
-v1.2.0 (11 Nov 2025)
+v1.2.1 (11 Nov 2025)
 ~~~~~~~~~~~~~~~~~~~~
 
 
 - Add support for Trac bugtracker (Frank Sommer). Closes
   `Issue #834 <https://github.com/kiwitcms/Kiwi/issues/834>`_
+- Add link to documentation for Personal API tokens admin page
 - Update for Django 5.2 compatibility
 
 
