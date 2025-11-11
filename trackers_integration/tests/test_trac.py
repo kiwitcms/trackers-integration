@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2025 Alexander Todorov <atodorov@otb.bg>
 # Copyright (c) 2025 Frank Sommer <Frank.Sommer@sherpa-software.de>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
@@ -53,7 +53,7 @@ class TestTracIntegration(APITestCase):
         )
         cls.integration = Trac(cls.bug_system, None)
 
-        create_params = {
+        ticket_data = {
             "type": "defect",
             "priority": "major",
             "summary": "Smoke test failed",
@@ -61,7 +61,7 @@ class TestTracIntegration(APITestCase):
             "project": cls.project_name,
             "component": cls.project_name,
         }
-        issue = cls.integration.rpc.invoke_method("ticket.create", create_params)
+        issue = cls.integration.rpc.create_ticket(ticket_data)
 
         cls.existing_bug_id = issue["id"]
         cls.existing_bug_url = (

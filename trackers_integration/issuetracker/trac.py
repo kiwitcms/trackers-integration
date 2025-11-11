@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2025 Alexander Todorov <atodorov@otb.bg>
 # Copyright (c) 2025 Frank Sommer <Frank.Sommer@sherpa-software.de>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
@@ -82,6 +82,9 @@ class TracAPI:
             return result
         raise RuntimeError(f"{rc}: {resp.reason}")
 
+    def create_ticket(self, ticket_data):
+        return self.invoke_method("ticket.create", ticket_data)
+
 
 class Trac(IssueTrackerType):
     """
@@ -126,7 +129,7 @@ class Trac(IssueTrackerType):
             version = execution.build.version.value
             summary = f"Failed test: {execution.case.summary}"
             description = self._report_comment(execution, user)
-            ticket = {
+            ticket_data = {
                 "type": "defect",
                 "priority": "major",
                 "summary": summary,
@@ -135,7 +138,7 @@ class Trac(IssueTrackerType):
                 "version": version,
                 "component": product,
             }
-            issue = self.rpc.invoke_method("ticket.create", ticket)
+            issue = self.rpc.create_ticket(ticket_data)
             issue_id = issue.get("id")
             issue_url = f"{self.bug_system.base_url}/{product}/ticket/{issue_id}"
             # add a link reference that will be shown in the UI
