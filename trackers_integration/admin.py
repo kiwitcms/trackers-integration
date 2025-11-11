@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2023-2025 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -38,6 +38,19 @@ class ApiTokenAdminForm(forms.ModelForm):
 
 
 class ApiTokenAdmin(admin.ModelAdmin):
+    _for_more_info = """WARNING: read
+<a href="https://kiwitcms.org/blog/kiwi-tcms-team/2023/12/06/feature-showcase-personal-api-tokens/">
+the documentation</a> before editting the values below!"""
+    fieldsets = [
+        (
+            "",
+            {
+                "fields": ("base_url", "api_username", "api_password"),
+                "description": f"<h1>{_for_more_info}</h1>",
+            },
+        ),
+    ]
+
     list_display = ("id", "owner", "base_url", "api_username")
     form = ApiTokenAdminForm
 
