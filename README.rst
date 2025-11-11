@@ -23,6 +23,15 @@ various Issue Trackers.
 Changelog
 ---------
 
+v1.2.0 (11 Nov 2025)
+~~~~~~~~~~~~~~~~~~~~
+
+
+- Add support for Trac bugtracker (Frank Sommer). Closes
+  `Issue #834 <https://github.com/kiwitcms/Kiwi/issues/834>`_
+- Update for Django 5.2 compatibility
+
+
 v1.1.0 (08 Nov 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
