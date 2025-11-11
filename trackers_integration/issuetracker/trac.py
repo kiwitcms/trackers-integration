@@ -92,8 +92,11 @@ class Trac(IssueTrackerType):
 
     Support for `Trac <https://trac.edgewall.org/>`_ - open source
     issue tracking system, version 1.6 and above.
-    Trac server must have plugin trac-ticketrpc installed (https://pypi.org/project/trac-ticketrpc)
-    Project name in Trac must match product name in Kiwi TCMS.
+
+    **IMPORTANT:** Trac server must have the
+    `trac-ticketrpc <https://pypi.org/project/trac-ticketrpc>`_ plugin installed!
+
+    **IMPORTANT:** Project name in Trac must match product name in Kiwi TCMS.
 
     .. warning::
 
