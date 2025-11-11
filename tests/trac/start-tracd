@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# make sure, environment variables for Trac product and users have been set
+if [ "$TRAC_PRODUCT" == "" ]; then
+  echo "Environment variable TRAC_PRODUCT not defined"
+  exit 1
+fi
+if [ "$TRAC_USERS" == "" ]; then
+  echo "Environment variable TRAC_USERS not defined"
+  exit 1
+fi
+
+product_path="/opt/trac/products/$TRAC_PRODUCT"
+pwfile=/opt/trac/.htpwd
+
+if [ ! -d "$product_path" ]; then
+  rm -f $pwfile
+  # create Trac product environment
+  trac-admin "$product_path" initenv --config=kiwitcms.ini "$TRAC_PRODUCT"
+  # setup Trac users
+  for user in $(echo $TRAC_USERS | tr ";" "\n")
+  do
+    username=`echo $user | awk '{split($0,a,":"); print a[1]}'`
+    pwd=`echo $user | awk '{split($0,a,":"); print a[2]}'`
+    perms=`echo $user | awk '{split($0,a,":"); print a[3]}'`
+    # set permissions for Trac user
+    cmd="trac-admin \"$product_path\" permission add $username $perms"
+    eval $cmd
+    # add Trac user to password file for HTTP authentication
+    cryptpwd=`echo $pwd | openssl passwd -apr1 -stdin`
+    # need to use printf here, since echo messes up encrypted password due to dollar signs
+    cmd="printf '$username:$cryptpwd\n' >> $pwfile"
+    eval $cmd
+  done
+fi
+
+echo "Running Trac daemon"
+tracd -p 80 --http11 --basic-auth="$TRAC_PRODUCT,$pwfile,Trac" "$product_path"
