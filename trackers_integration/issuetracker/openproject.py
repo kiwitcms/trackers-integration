@@ -15,7 +15,6 @@ from django.conf import settings
 from tcms.core.contrib.linkreference.models import LinkReference
 from tcms.issuetracker import base
 
-
 RE_MATCH_INT = re.compile(r"work_packages/([\d]+)(/activity)*$")
 
 
@@ -101,7 +100,7 @@ class OpenProject(base.IssueTrackerType):
     """
 
     def _rpc_connection(self):
-        (_, api_password) = self.rpc_credentials
+        _, api_password = self.rpc_credentials
 
         return API(self.bug_system.base_url, api_password)
 
@@ -109,7 +108,7 @@ class OpenProject(base.IssueTrackerType):
         """
         :meta private:
         """
-        (_, api_password) = self.rpc_credentials
+        _, api_password = self.rpc_credentials
 
         return not (self.bug_system.base_url and api_password)
 
