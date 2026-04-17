@@ -54,7 +54,7 @@ jobs:
 
         make checkout_kiwi
 
-        pip install -U pip
+        pip install -U pip "setuptools<82"
         pip install -r devel.txt
 
     - name: Initialize bugs DB
