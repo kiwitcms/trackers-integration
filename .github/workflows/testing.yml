@@ -71,9 +71,13 @@ jobs:
     - name: Prepare ENV
       id: prepare-env
       if: matrix.tracker == 'internals'
+      env:
+        PKG_TOKEN: ${{ secrets.GEMFURY_PULL_TOKEN }}
       run: |
         echo "CI_USE_MULTI_TENANT=1" >> "$GITHUB_OUTPUT"
-        pip install kiwitcms-tenants
+        pip install kiwitcms-tenants \
+          --index-url https://$PKG_TOKEN@pkg.kiwitcms.eu/pypi/ \
+          --extra-index-url https://pypi.org/simple/
 
     - name: Execute tests
       env:
