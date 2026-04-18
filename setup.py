@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -26,7 +26,7 @@ def get_install_requires(path):
 
 setup(
     name="kiwitcms-trackers-integration",
-    version="1.2.1",
+    version="1.2.2",
     description="Integration between Kiwi TCMS and various Issue Trackers",
     long_description=get_long_description(),
     author="Kiwi TCMS",
