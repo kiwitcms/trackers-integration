@@ -23,9 +23,17 @@ various Issue Trackers.
 Changelog
 ---------
 
-v1.2.1 (11 Nov 2025)
+v1.2.2 (17 Apr 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
+- Update GitHub actions
+- Update pylint-django from 2.6.1 to 2.7.0
+- Test against more up-to-date Trac container
+- Test against MantisBT v2.28.1
+
+
+v1.2.1 (11 Nov 2025)
+~~~~~~~~~~~~~~~~~~~~
 
 - Add support for Trac bugtracker (Frank Sommer). Closes
   `Issue #834 <https://github.com/kiwitcms/Kiwi/issues/834>`_
