@@ -18,7 +18,7 @@ ${API_TOKEN_URL}        ${SERVER}/api_tokens_page.php
 
 *** Test Cases ***
 Install Mantis BT and create API token
-    Open Browser    ${INSTALL_URL}    ${BROWSER}        service_log_path=${{os.path.devnull}}
+    Open Browser    ${INSTALL_URL}    ${BROWSER}
     Maximize Browser Window
     Set Selenium Speed    ${DELAY}
     Title Should Be    Administration - Installation - MantisBT
