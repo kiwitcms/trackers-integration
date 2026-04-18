@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -44,3 +44,17 @@ messages: checkout_kiwi
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) CI_USE_MULTI_TENANT=1 KIWI_TENANTS_DOMAIN='test.com' \
 	    ./manage.py makemessages --locale en --no-obsolete --no-vinaigrette --ignore "test*.py"
 	ls trackers_integration/locale/*/LC_MESSAGES/*.po | xargs -n 1 -I @ msgattrib -o @ --no-fuzzy @
+
+
+.PHONY: package
+package:
+	rm -rf build/ dist/ kiwitcms_*.egg-info/
+	python setup.py sdist
+	python setup.py bdist_wheel
+	twine check dist/*
+
+.PHONY: upload
+upload: package
+	test -n "$(TWINE_USERNAME)" || exit 1
+	test -n "$(TWINE_PASSWORD)" || exit 2
+	twine upload dist/* --repository-url https://push.fury.io/kiwitcms
