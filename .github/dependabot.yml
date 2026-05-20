@@ -1,14 +1,9 @@
 version: 2
 updates:
   - package-ecosystem: pip
-    directory: "/"
-    schedule:
-      interval: daily
-      time: "03:00"
-    open-pull-requests-limit: 10
-
-  - package-ecosystem: pip
-    directory: "/tests/trac/"
+    directories:
+      - "/"
+      - "/tests/trac/"
     schedule:
       interval: daily
       time: "03:00"
@@ -22,14 +17,17 @@ updates:
     open-pull-requests-limit: 5
 
   - package-ecosystem: "docker"
-    directory: "/tests/openproject/"
+    directories:
+      - "/tests/mantis/"
+      - "/tests/trac/"
     schedule:
       interval: "weekly"
       time: "04:00"
     open-pull-requests-limit: 5
 
-  - package-ecosystem: "docker"
-    directory: "/tests/trac/"
+  - package-ecosystem: "docker-compose"
+    directories:
+      - "/tests/openproject/"
     schedule:
       interval: "weekly"
       time: "04:00"
