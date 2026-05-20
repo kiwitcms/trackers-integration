@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -17,7 +17,7 @@ bot = User.create!(
     :firstname => 'Testing',
     :lastname => 'Bot',
     :mail => 'bot@example.com',
-    :password => 'Hello-World',
+    :password => 'Hell0-W0rld',
 )
 hashed_value = Token::API.hash_function('c48c60020d8f61e612241889eff79e610410f1322811d8c20df25a71f3619e25')
 Token::API.create :user_id => bot.id, :value => hashed_value
