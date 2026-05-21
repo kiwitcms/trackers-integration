@@ -8,6 +8,7 @@ services:
             - 80:80
         environment:
             OPENPROJECT_SECRET_KEY_BASE: secret
+            OPENPROJECT_DISABLE__SECRET_KEY_BASE__CHECK: "true"
             OPENPROJECT_HOST__NAME: bugtracker.kiwitcms.org
             OPENPROJECT_HTTPS: "false"
         volumes:
