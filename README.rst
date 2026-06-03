@@ -23,12 +23,20 @@ various Issue Trackers.
 Changelog
 ---------
 
+v1.3.1 (03 Jun 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Remove restriction on setuptools version
+- Build & test with Python 3.12
+- Update pre-commit.ci config
+
+
 v1.3.0 (23 May 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
 - Make this code compatible with setuptools>=82
 - Update psycopg requirement from >=3.1.17 to >=3.3.4
-- Update pre-commit.ci cofnig
+- Update pre-commit.ci config
 - Update the structure of dependabot.yml
 - Update openproject/openproject during testing from 13 to 17
 
