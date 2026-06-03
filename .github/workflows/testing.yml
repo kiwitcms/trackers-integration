@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.11]
+        python-version: [3.12]
 
     steps:
       - uses: actions/checkout@v6
@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         kiwitcms-url: [tcms.kiwitcms.org, public.tenant.kiwitcms.org]
-        python-version: [3.11]
+        python-version: [3.12]
         tracker: [internals, mantis, openproject, trac]
 
     steps:
@@ -147,7 +147,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.11]
+        python-version: [3.12]
 
     steps:
     - uses: actions/checkout@v6
