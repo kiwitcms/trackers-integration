@@ -136,7 +136,7 @@ jobs:
         path: docker-compose.logs
 
     - name: Send coverage to codecov.io
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@v7
       with:
         fail_ci_if_error: false
         verbose: true
