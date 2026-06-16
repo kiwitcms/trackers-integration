@@ -23,6 +23,12 @@ various Issue Trackers.
 Changelog
 ---------
 
+v1.4.0 (16 Jun 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Minimum supported Python version is 3.12
+
+
 v1.3.1 (03 Jun 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
