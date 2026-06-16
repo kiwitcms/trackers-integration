@@ -34,6 +34,7 @@ setup(
     url="https://github.com/kiwitcms/trackers-integration/",
     license="AGPLv3+",
     install_requires=get_install_requires("requirements.txt"),
+    python_requires=">=3.12",
     include_package_data=True,
     packages=find_packages(exclude=["test_project*", "*.tests"]),
     zip_safe=False,
@@ -49,9 +50,7 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Framework :: Django :: 6.0",
     ],
 )
