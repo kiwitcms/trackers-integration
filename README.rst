@@ -1,3 +1,5 @@
+DEBUG
+
 Extra Issue Tracker integration for Kiwi TCMS
 =============================================
 
