@@ -23,6 +23,13 @@ various Issue Trackers.
 Changelog
 ---------
 
+v1.5.0 (23 Aug 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Do not render api_password field in Admin page
+- Remove license specifier from setup.py
+
+
 v1.4.0 (16 Jun 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
