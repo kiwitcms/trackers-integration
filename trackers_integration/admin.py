@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2023-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -24,12 +24,20 @@ from trackers_integration.models import ApiToken
 
 
 class ApiTokenAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.api_password:
+            self.fields["api_password"].help_text = (
+                "WARNING: value from DB not shown; type a new one to overwrite"
+            )
+
     # display a drop-down of filtered URLs of defined Issue Trackers
     base_url = forms.ChoiceField(required=True)
 
     # make password show asterisks
     api_password = forms.CharField(
-        widget=forms.PasswordInput(render_value=True), required=True
+        widget=forms.PasswordInput(render_value=False, attrs={"class": "vTextField"}),
+        required=True,
     )
 
     class Meta:
@@ -55,6 +63,13 @@ the documentation</a> before editting the values below!"""
     form = ApiTokenAdminForm
 
     def save_model(self, request, obj, form, change):
+        # prevent overwriting when editing other fields subsequently
+        if not obj.api_password and change:
+            from_db = obj.__class__.objects.get(pk=obj.pk)
+
+            obj.api_password = from_db.api_password
+            form.cleaned_data["api_password"] = from_db.api_password
+
         obj.owner = request.user
         super().save_model(request, obj, form, change)
 
