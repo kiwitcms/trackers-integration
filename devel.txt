@@ -6,6 +6,6 @@ flake8
 parameterized
 pylint-django==2.8.0
 kiwitcms-django-plugin
-psycopg>=3.3.4
+psycopg>=3.3.5
 robotframework
 robotframework-seleniumlibrary
