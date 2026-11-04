@@ -13,7 +13,7 @@ permissions: read-all
 
 jobs:
   build-package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         python-version: [3.14]
@@ -34,7 +34,7 @@ jobs:
 
   integration:
     name: ${{ matrix.tracker }} / ${{ matrix.kiwitcms-url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -143,7 +143,7 @@ jobs:
 
   lint:
     name: ${{ matrix.tracker }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
