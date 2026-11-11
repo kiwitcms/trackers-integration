@@ -67,7 +67,7 @@ v1.2.1 (11 Nov 2025)
 ~~~~~~~~~~~~~~~~~~~~
 
 - Add support for Trac bugtracker (Frank Sommer). Closes
-  `Issue #834 <https://github.com/kiwitcms/Kiwi/issues/834>`_
+  `Issue #834 <https://github.com/kiwitcms/kiwitcms/issues/834>`_
 - Add link to documentation for Personal API tokens admin page
 - Update for Django 5.2 compatibility
 
@@ -94,8 +94,8 @@ v0.7.0 (14 Jan 2024)
 
 - 1-click bug report will now use ``execution.build.version.product`` instead
   of ``execution.run.plan.product`` following changes in Kiwi TCMS, see:
-  https://github.com/kiwitcms/Kiwi/commit/48a33a71e664c8c3ed2ceb298b5f1e19d0bddb52
-  and `PR #3439 <https://github.com/kiwitcms/Kiwi/pull/3439>`_ for more details
+  https://github.com/kiwitcms/kiwitcms/commit/48a33a71e664c8c3ed2ceb298b5f1e19d0bddb52
+  and `PR #3439 <https://github.com/kiwitcms/kiwitcms/pull/3439>`_ for more details
 - Fix typo in markdown
 - Build & test with Python 3.11
 - Test with psycopg3
